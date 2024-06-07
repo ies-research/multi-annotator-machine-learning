@@ -1,0 +1,23 @@
+class_definition:
+  _target_: maml.data.DTDSim
+  root: "."
+  annotation_file: "dtd_sim.pt"
+  n_annotations_per_sample: [1]
+max_epochs: 50
+num_workers: 4
+train_batch_size: 64
+eval_batch_size: 64
+optimizer:
+  class_definition: torch.optim.RAdam
+  gt_params:
+    lr: 1e-2
+    weight_decay: 1e-4
+  ap_params:
+    lr: 1e-2
+    weight_decay: 0
+lr_scheduler:
+  class_definition: torch.optim.lr_scheduler.CosineAnnealingLR
+  params:
+    T_max: 50
+
+

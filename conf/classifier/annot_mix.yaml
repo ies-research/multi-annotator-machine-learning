@@ -1,0 +1,10 @@
+name: "annot_mix"
+class_definition:
+  _target_: maml.classifiers.AnnotMixClassifier
+params:
+  alpha: 1.0
+  eta: 0.9
+  mix_only_annotators: False
+embed_size: 128
+annotators: "one-hot"
+aggregation_method: null

@@ -1,0 +1,9 @@
+name: "geo_reg_w"
+class_definition:
+  _target_: maml.classifiers.RegCrowdNetClassifier
+params:
+  regularization: "geo-reg-w"
+  lmbda: 1e-3
+annotators: "index"
+aggregation_method: null
+embed_size: null

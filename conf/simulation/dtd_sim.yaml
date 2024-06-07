@@ -1,0 +1,20 @@
+name: "dtd_sim"
+class_definition:
+  _target_: maml.data.DTDSim
+  root: "."
+  download: False
+max_epochs: 10
+min_samples: 10
+lr_min: 1e-4
+lr_max: 1e-1
+alpha_1: 0.0
+beta_1: 1.0
+alpha_2: 0.5
+beta_2: 2.0
+num_workers: 4
+batch_size: 64
+optimizer:
+  class_definition: torch.optim.RAdam
+  params:
+    lr: 1e-2
+    weight_decay: 1e-4

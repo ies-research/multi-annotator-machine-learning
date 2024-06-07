@@ -1,0 +1,8 @@
+name: "aggregate"
+class_definition:
+  _target_: maml.classifiers.AggregateClassifier
+params:
+  alpha: 0.0
+embed_size: 128
+annotators: "one-hot"
+aggregation_method: "ground-truth"

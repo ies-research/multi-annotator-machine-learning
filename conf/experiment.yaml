@@ -1,0 +1,9 @@
+defaults:
+  - _self_
+  - data: letter_sim
+  - architecture: tabnet_letter_sim
+  - classifier: annot_mix
+experiment_name: "letter_sim_benchmark"
+mlruns_path: "/mnt/work/anonymous/maml/mlruns"
+accelerator: "cpu"
+seed: 3
