@@ -1,0 +1,184 @@
+<View>
+  	<Text name="anker" value=""/>
+    <Header value="Self-assessment Questions" underline="true"/>
+    <Header value="How would you rate your interest in animals and wildlife?"
+            style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="interest-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate your interest.">
+        <Choice value="Very low" hint="Sehr niedrieg"/>
+        <Choice value="Below average" hint="Unter dem Durchschnitt"/>
+        <Choice value="Average" hint="Durchschnittlich"/>
+        <Choice value="Above average" hint="Über dem Durchschnitt"/>
+        <Choice value="Very high" hint="Sehr hoch"/>
+    </Choices>
+    <Header value="How would you rate your knowledge about animals and wildlife?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="knowledge-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate your knowledge.">
+        <Choice value="Very low" hint="Sehr niedrieg"/>
+        <Choice value="Below average" hint="Unter dem Durchschnitt"/>
+        <Choice value="Average" hint="Durchschnittlich"/>
+        <Choice value="Above average" hint="Über dem Durchschnitt"/>
+        <Choice value="Very high" hint="Sehr hoch"/>
+    </Choices>
+    <Header value="Technical Questions" underline="true"/>
+    <Header value="Which vertebrate is known for having the longest lifespan?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="oldest-animal-choice" toName="anker" choice="single" showInline="false" required="true" requiredMessage="Answer the lifespan question.">
+        <Choice value="African elephant" hint="Afrikanischer Elefant"/>
+        <Choice value="Galapagos tortoise" hint="Galapagos-Riesenschildkröte"/>
+        <Choice value="Blue whale" hint="Blauwal"/>
+        <Choice value="Greenland shark" hint="Grönlandhai"/>
+        <Choice value="Aldabra giant tortoise" hint="Aldabra-Riesenschildkröte"/>
+    </Choices>
+    <Header value="Which animal is known for having the longest migration of any terrestrial mammal?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="mammal-migration-choice" toName="anker" choice="single" showInline="false" required="true" requiredMessage="Answer the migration question.">
+        <Choice value="Humpback whale" hint="Buckelwal"/>
+        <Choice value="Bactrian camel" hint="Trampeltier"/>
+        <Choice value="African elephant" hint="Afrikanischer Elefant"/>
+        <Choice value="Caribou" hint="Karibu"/>
+    </Choices>
+    <Header value="Which big cat is known for its exceptional tree-climbing skill?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="big-cats-choice" toName="anker" choice="single" showInline="false" required="true" requiredMessage="Answer the big cat question.">
+        <Choice value="Tiger" hint="Tiger"/>
+        <Choice value="Jaguar" hint="Jaguar"/>
+        <Choice value="Leopard" hint="Leopard"/>
+        <Choice value="Cheetah" hint="Gepard"/>
+    </Choices>
+    <Header value="Which statement regarding hares and rabbits is true?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="hares-choice" toName="anker" choice="single" showInline="false" required="true" requiredMessage="Answer the hare and rabbit question.">
+        <Choice value="Rabbits are born blind and hairless, hares are born with fur and can see." hint="Kaninchen werden blind und unbehaart geboren, Hasen haben ein Fell und können sehen."/>
+        <Choice value="Hares are born blind and hairless, rabbits are born with fur and can see." hint="Hasen werden blind und haarlos geboren, während Kaninchen mit Fell geboren werden und sehen können."/>
+        <Choice value="Both are born fully furred and with open eyes." hint="Beide werden mit vollem Fell und offenen Augen geboren."/>
+        <Choice value="Both are born blind and hairless." hint="Beide werden blind und haarlos geboren."/>
+    </Choices>
+    <Header value="Which statement is wrong about squirrels?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="squirrels-choice" toName="anker" choice="single" showInline="false" required="true" requiredMessage="Answer the squirrel question.">
+        <Choice value="Squirrel tails help with balance." hint="Eichhörnchenschwänze helfen bei der Balance."/>
+        <Choice value="Chipmunks are members of the squirrel family." hint="Streifenhörnchen gehören zur Familie der Eichhörnchen."/>
+        <Choice value="Squirrels' teeth do not stop growing." hint="Die Zähne von Eichhörnchen hören nicht auf zu wachsen."/>
+        <Choice value="Squirrels can remember the exact location of every nut they bury." hint="Eichhörnchen können sich genau merken, wo sie jede Nuss vergraben haben."/>
+    </Choices>
+    <Header value="Which statement is true about wasps?" style="font-weight: normal; font-size: 18.5px"/>
+    <Choices name="insects-choice" toName="anker" choice="single" showInline="false" required="true" requiredMessage="Answer the wasp question.">
+        <Choice value="Wasps have eight legs." hint="Wespen haben acht Beine."/>
+        <Choice value="Wasps die after a sting." hint="Wespen sterben nach einem Stich."/>
+        <Choice value="Acids in the wasps venom can lead to allergic reactions." hint="Die Säuren im Wespengift können zu allergischen Reaktionen führen."/>
+        <Choice value="Hornets are one of the most commonly known wasp." hint="Hornissen sind eine der bekanntesten Wespenarten."/>
+    </Choices>
+    <Header value="Interface Questions" underline="true"/>
+  	<Header value="Assume you are certain that the image shows either an American or Eurasian red squirrel. Further, assume that you think the shown animal is five times more likely to be an American red squirrel. How would you set the label likelihoods in this case?" style="font-weight: normal; font-size: 18.5px"/>
+  	<View style="display: flex;">
+            <View style="width: 190px; text-align: left;">
+                <Header value="Big Cats" size="4"/>
+                <Header value="Jaguar" style="font-weight: normal; margin-top: 0px; font-size: 18.5px;"/>
+                <Header value="Leopard" style="font-weight: normal; margin-top: 0px; font-size: 18.5px;"/>
+                <Header value="Cheetah" style="font-weight: normal; margin-top: 0px; font-size: 18.5px;"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="jaguar-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="leopard-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="cheetah-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+            <View style="width: 190px; text-align: left;">
+                <Header value="Squirrels" size="4"/>
+                <Header value="Douglas' Squirrel" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="American Red Squirrel" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Eurasian Red Squirrel" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="douglas-squirrel-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="american-red-squirrel-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="eurasian-red-squirrel-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+        </View>
+        <View style="display: flex;">
+            <View style="width: 190px; text-align: left;">
+                <Header value="Hares and Rabbits" size="4"/>
+                <Header value="Brown Hare" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Black-tailed Jackrabbit" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Marsh Rabbit" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="European Rabbit" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Desert Cottontail" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="brown-hare-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="black-tailed-jackrabbit-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="marsh-rabbit-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="european-rabbit-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="desert-cottontail-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+            <View style="width: 190px; text-align: left;">
+                <Header value="Insects" size="4"/>
+                <Header value="Asian Hornet" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="European Hornet" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="European Paper Wasp" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="German Yellowjacket" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="asian-hornet-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="european-hornet-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="european-paper-wasp-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="german-yellowjacket-1" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+        </View>
+  	<Header value="Assume you are certain that the image shows one of the four insects. Further, assume that you think that it shows definitiely not an Asian hornet. How would you set the label likelihoods in this case?" style="font-weight: normal; font-size: 18.5px"/>
+  	<View style="display: flex;">
+            <View style="width: 190px; text-align: left;">
+                <Header value="Big Cats" size="4"/>
+                <Header value="Jaguar" style="font-weight: normal; margin-top: 0px; font-size: 18.5px;"/>
+                <Header value="Leopard" style="font-weight: normal; margin-top: 0px; font-size: 18.5px;"/>
+                <Header value="Cheetah" style="font-weight: normal; margin-top: 0px; font-size: 18.5px;"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="jaguar-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="leopard-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="cheetah-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+            <View style="width: 190px; text-align: left;">
+                <Header value="Squirrels" size="4"/>
+                <Header value="Douglas' Squirrel" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="American Red Squirrel" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Eurasian Red Squirrel" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="douglas-squirrel-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="american-red-squirrel-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="eurasian-red-squirrel-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+        </View>
+        <View style="display: flex;">
+            <View style="width: 190px; text-align: left;">
+                <Header value="Hares and Rabbits" size="4"/>
+                <Header value="Brown Hare" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Black-tailed Jackrabbit" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Marsh Rabbit" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="European Rabbit" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="Desert Cottontail" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="brown-hare-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="black-tailed-jackrabbit-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="marsh-rabbit-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="european-rabbit-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="desert-cottontail-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+            <View style="width: 190px; text-align: left;">
+                <Header value="Insects" size="4"/>
+                <Header value="Asian Hornet" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="European Hornet" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="European Paper Wasp" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+                <Header value="German Yellowjacket" style="font-weight: normal; margin-top: 0px; font-size: 18.5px"/>
+            </View>
+            <View style="width: 220px; margin-left: 1em;">
+                <Header value="Label Likelihood" size="4"/>
+                <Number name="asian-hornet-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="european-hornet-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="european-paper-wasp-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+                <Number name="german-yellowjacket-2" toName="anker" min="0" max="10" step="1" defaultValue="0" slider="true"/>
+            </View>
+        </View>
+</View>

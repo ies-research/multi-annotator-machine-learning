@@ -2,7 +2,7 @@ import torch
 
 from abc import ABC, abstractmethod
 from lightning.pytorch import LightningModule
-from torch.optim import Optimizer, AdamW
+from torch.optim import Optimizer, RAdam
 from torch.optim.lr_scheduler import LRScheduler
 from typing import Optional, Dict
 
@@ -16,8 +16,8 @@ class MaMLClassifier(LightningModule, ABC):
 
     Parameters
     ----------
-    optimizer : torch.optim.Optimizer.__class__, optional (default=AdamW.__class__)
-        Optimizer class responsible for optimizing the GT and AP parameters. If `None`, the `AdamW` optimizer is used
+    optimizer : torch.optim.Optimizer.__class__, optional (default=RAdam.__class__)
+        Optimizer class responsible for optimizing the GT and AP parameters. If `None`, the `RAdam` optimizer is used
         by default.
     optimizer_gt_dict : dict, optional (default=None)
         Parameters passed to `optimizer` for the GT model.
@@ -32,7 +32,7 @@ class MaMLClassifier(LightningModule, ABC):
 
     def __init__(
         self,
-        optimizer: Optimizer.__class__ = AdamW,
+        optimizer: Optimizer.__class__ = RAdam,
         optimizer_gt_dict: Optional[dict] = None,
         optimizer_ap_dict: Optional[dict] = None,
         lr_scheduler: Optional[LRScheduler.__class__] = None,
@@ -49,7 +49,19 @@ class MaMLClassifier(LightningModule, ABC):
         self.lr_scheduler = lr_scheduler
         self.lr_scheduler_dict = lr_scheduler_dict
 
-    def validation_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+    def validation_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: int = 0):
+        """
+        Evaluates and logs the performance of the GT model on the given validation data as `"gt_val_acc"`.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+        """
         batch.pop("a", None)
         output = self.predict_step(batch=batch, batch_idx=batch_idx, dataloader_idx=dataloader_idx)
         p_class = output.get("p_class")
@@ -58,6 +70,19 @@ class MaMLClassifier(LightningModule, ABC):
         self.log("gt_val_acc", acc, on_step=False, on_epoch=True, prog_bar=True, batch_size=len(y_pred))
 
     def test_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Evaluates and logs the performance of the GT model on the given test data as `"gt_val_acc"` and (optionally)
+        of the AP model as "ap_test_acc".
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+        """
         output = self.predict_step(batch=batch, batch_idx=batch_idx, dataloader_idx=dataloader_idx)
         p_class = output.get("p_class")
         p_perf = output.get("p_perf", None)
@@ -80,6 +105,17 @@ class MaMLClassifier(LightningModule, ABC):
             self.log_dict({"ap_test_acc": ap_test_acc}, batch_size=len(is_true), on_step=False, on_epoch=True)
 
     def configure_optimizers(self):
+        """
+        Configures optimizers and learning rate schedulers of the ground truth (GT) and annotator performance (AP)
+        models.
+
+        Returns
+        -------
+        optimizers : list
+            The list of configured optimizers.
+        lr_schedulers : list
+            The list of configured learning rate schedulers.
+        """
         # Setup optimizer.
         optimizer_gt_dict = {} if self.optimizer_gt_dict is None else self.optimizer_gt_dict
         optimizer_ap_dict = optimizer_gt_dict if self.optimizer_ap_dict is None else self.optimizer_ap_dict

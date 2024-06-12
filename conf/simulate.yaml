@@ -1,9 +1,0 @@
-defaults:
-  - _self_
-  - simulation: dtd_sim
-  - architecture: dino
-
-seed: 0
-accelerator: "gpu"
-n_annotators: 20
-embed_size: null

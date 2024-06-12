@@ -1,5 +1,0 @@
-name: "tabnet"
-params:
-  n_hidden_neurons: [256, 128]
-  n_features: 128
-  dropout_rate: 0.0

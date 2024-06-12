@@ -1,0 +1,7 @@
+name: "aggregate"
+class_definition:
+  _target_: maml.classifiers.AggregateClassifier
+params:
+  alpha: 0.0
+annotators: null
+aggregation_method: "ground-truth"

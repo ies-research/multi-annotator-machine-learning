@@ -2,7 +2,7 @@ import torch
 
 from torch import nn
 from torch.nn import functional as F
-from torch.optim import Optimizer, AdamW
+from torch.optim import Optimizer, RAdam
 from torch.optim.lr_scheduler import LRScheduler
 from typing import Optional, Dict, Literal, Union
 
@@ -23,32 +23,34 @@ class RegCrowdNetClassifier(MaMLClassifier):
     n_annotators : int
         Number of annotators.
     gt_embed_x : nn.Module
-        Pytorch module of the GT model embedding the input samples.
+        Pytorch module the GT model' backbone embedding the input samples.
     gt_output : nn.Module
         Pytorch module of the GT model taking the embedding the samples as input to predict class-membership logits.
     lmbda : non-negative float, optional (default=0.01)
-        Regularization term penalizing the sums of diagonals of annotators' confusion matrices.
-    optimizer : torch.optim.Optimizer, optional (default=None)
-        Optimizer responsible for optimizing the GT and AP parameters. If None, the `AdamW` optimizer is used by
-        default.
+        Degree of regularization.
+    regularization : "trace-reg" or "geo-reg-f" or "geo-reg-w"
+        Defines which regularization for the annotator confusion matrices is applied, either by regularizing the traces
+        of the confusion matrices [1] or a geometrically motivated regularization [2].
+    optimizer : torch.optim.Optimizer.__class__, optional (default=RAdam.__class__)
+        Optimizer class responsible for optimizing the GT and AP parameters. If `None`, the `RAdam` optimizer is used
+        by default.
     optimizer_gt_dict : dict, optional (default=None)
-        Parameters passed to `optimizer`.
+        Parameters passed to `optimizer` for the GT model.
     optimizer_ap_dict : dict, optional (default=None)
-        Parameters passed to `optimizer`.
-    lr_scheduler : torch.optim.lr_scheduler.LRScheduler, optional (default=None)
-        Optimizer responsible for optimizing the GT and AP parameters. If None, the `AdamW` optimizer is used by
-        default.
+        Parameters passed to `optimizer` for the AP model.
+    lr_scheduler : torch.optim.lr_scheduler.LRScheduler.__class__, optional (default=None)
+        Learning rate scheduler responsible for optimizing the GT and AP parameters. If `None`, no learning rate
+        scheduler is used by default.
     lr_scheduler_dict : dict, optional (default=None)
         Parameters passed to `lr_scheduler`.
 
     References
     ----------
     [1] Tanno, Ryutaro, Ardavan Saeedi, Swami Sankaranarayanan, Daniel C. Alexander, and Nathan Silberman.
-        "Learning from noisy labels by regularized estimation of annotator confusion." In Proceedings of the IEEE/CVF
-        conference on computer vision and pattern recognition, pp. 11244-11253. 2019.
+        "Learning from noisy labels by regularized estimation of annotator confusion." IEEE/CVF Conf. Comput. Vis.
+         Pattern Recognit., pp. 11244-11253. 2019.
     [2] Ibrahim, Shahana, Tri Nguyen, and Xiao Fu. "Deep Learning From Crowdsourced Labels: Coupled Cross-Entropy
-        Minimization, Identifiability, and Regularization." In The Eleventh International Conference on Learning
-        Representations. 2023.
+        Minimization, Identifiability, and Regularization." Int. Conf. Learn. Represent. 2023.
     """
 
     def __init__(
@@ -59,7 +61,7 @@ class RegCrowdNetClassifier(MaMLClassifier):
         gt_output: nn.Module,
         lmbda: Union[str, float] = "auto",
         regularization: Literal["trace-reg", "geo-reg-f", "geo-reg-w"] = "trace-reg",
-        optimizer: Optional[Optimizer.__class__] = AdamW,
+        optimizer: Optional[Optimizer.__class__] = RAdam,
         optimizer_gt_dict: Optional[dict] = None,
         optimizer_ap_dict: Optional[dict] = None,
         lr_scheduler: Optional[LRScheduler.__class__] = None,
@@ -109,6 +111,23 @@ class RegCrowdNetClassifier(MaMLClassifier):
         return logits_class
 
     def training_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes the RegCrowdNet's loss.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        loss : torch.Float
+            Computed cross-entropy loss.
+        """
         logits_class = self.forward(x=batch["x"])
         loss = RegCrowdNetClassifier.loss(
             z=batch["z"],
@@ -121,6 +140,23 @@ class RegCrowdNetClassifier(MaMLClassifier):
 
     @torch.inference_mode()
     def predict_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes the GT and (optionally) AP models' predictions.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        predictions : dict
+            A dictionary of predictions fitting the expected structure of `maml.classifiers.MaMLClassifier`.
+        """
         self.eval()
         a = batch.get("a", None)
         output = self.forward(x=batch["x"])
@@ -135,17 +171,17 @@ class RegCrowdNetClassifier(MaMLClassifier):
 
     @staticmethod
     def loss(
-            z: torch.tensor,
-            logits_class: torch.tensor,
-            ap_confs: torch.tensor,
-            lmbda: float = 0.01,
-            regularization: Literal["trace-reg", "geo-reg-f", "geo-reg-w"] = "trace-reg",
+        z: torch.tensor,
+        logits_class: torch.tensor,
+        ap_confs: torch.tensor,
+        lmbda: float = 0.01,
+        regularization: Literal["trace-reg", "geo-reg-f", "geo-reg-w"] = "trace-reg",
     ):
         """
-        Computes the loss of REAC according to the article [1].
+        Computes RegCrowdNet's loss according either to the article [1] or to the article [2].
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         z : torch.tensor of shape (n_samples, n_annotators)
             Annotations, where `z[i,j]=c` indicates that annotator `j` provided class label `c` for sample
             `i`. A missing label is denoted by `c=-1`.
@@ -157,6 +193,17 @@ class RegCrowdNetClassifier(MaMLClassifier):
             annotator `j`.
         lmbda : non-negative float, optional (default=0.01)
             Regularization term penalizing the sums of diagonals of annotators' confusion matrices.
+        regularization : "trace-reg" or "geo-reg-f" or "geo-reg-w"
+            Defines which regularization for the annotator confusion matrices is applied, either by regularizing the
+            traces of the confusion matrices [1] or a geometrically motivated regularization [2].
+
+        References
+        ----------
+        [1] Tanno, Ryutaro, Ardavan Saeedi, Swami Sankaranarayanan, Daniel C. Alexander, and Nathan Silberman.
+            "Learning from noisy labels by regularized estimation of annotator confusion." IEEE/CVF Conf. Comput. Vis.
+             Pattern Recognit., pp. 11244-11253. 2019.
+        [2] Ibrahim, Shahana, Tri Nguyen, and Xiao Fu. "Deep Learning From Crowdsourced Labels: Coupled Cross-Entropy
+            Minimization, Identifiability, and Regularization." Int. Conf. Learn. Represent. 2023.
         """
         n_samples, n_annotators = z.shape[0], z.shape[1]
         combs = torch.cartesian_prod(
@@ -197,11 +244,27 @@ class RegCrowdNetClassifier(MaMLClassifier):
 
     @torch.no_grad()
     def get_gt_parameters(self, **kwargs):
+        """
+        Returns the list of parameters of the GT model.
+
+        Returns
+        -------
+        gt_parameters : list
+            The list of the GT models' parameters.
+        """
         gt_parameters = list(self.gt_embed_x.parameters())
         gt_parameters += list(self.gt_output.parameters())
         return gt_parameters
 
     @torch.no_grad()
     def get_ap_parameters(self, **kwargs):
+        """
+        Returns the list of parameters of the AP model.
+
+        Returns
+        -------
+        ap_parameters : list
+            The list of the AP models' parameters.
+        """
         ap_parameters = self.ap_confs
         return ap_parameters

@@ -1,7 +1,7 @@
 import math
 import torch
 
-from torch.optim import Optimizer, AdamW
+from torch.optim import Optimizer, RAdam
 from torch.optim.lr_scheduler import LRScheduler
 from torch import nn
 from torch.nn import functional as F
@@ -13,6 +13,38 @@ from ..utils import mixup, permute_same_value_indices
 
 
 class AnnotMixModule(nn.Module):
+    """AnnotMixModule
+
+    This class implements an auxiliary module of the framework annot-mix [1], which trains a multi-annotator classifier
+    using an extension of mixup [2].
+
+    Parameters
+    ----------
+     n_classes : int
+        Number of classes
+    gt_embed_x : nn.Module
+        Pytorch module the GT model' backbone embedding the input samples.
+    gt_output : nn.Module
+        Pytorch module of the GT model taking the embedding the samples as input to predict class-membership logits.
+    ap_embed_a : nn.Module
+        Pytorch module of the AP model embedding the annotator features for the AP model.
+    ap_output : nn.Module
+        Pytorch module of the AP model predicting the logits of the conditional confusion matrix
+    ap_embed_x : nn.Module, optional (default=None)
+        Pytorch module of the AP model embedding samples.
+    ap_hidden : nn.Module, optional (default=None)
+        Pytorch module of the AP model taking the concatenation of annotator, sample (optional) and outer product
+        (optional) embedding as input to create a new embedding as input to the `ap_output` module.
+        By default, it is an identity mapping.
+
+    References
+    ----------
+    [1] Herde, M., Lührs, L., Huseljic, D., & Sick, B. (2024). Annot-Mix: Learning with Noisy Class Labels from
+        Multiple Annotators via a Mixup Extension. arXiv:2405.03386.
+    [2] Zhang, H., Cisse, M., Dauphin, Y. N., & Lopez-Paz, D. (2018). mixup: Beyond Empirical Risk Minimization.
+        Int. Conf. Learn. Represent.
+    """
+
     def __init__(
         self,
         n_classes: int,
@@ -33,23 +65,21 @@ class AnnotMixModule(nn.Module):
         self.ap_embed_x = ap_embed_x
 
     def forward(
-            self,
-            x: torch.tensor,
-            a: Optional[torch.tensor] = None,
-            combs: Union[str, None, torch.tensor] = "full"
+        self, x: torch.tensor, a: Optional[torch.tensor] = None, combs: Union[str, None, torch.tensor] = "full"
     ):
-        """Forward propagation of samples' and annotators' (optional) features through the GT and AP (optional) model.
+        """
+        Forward propagation of samples' and annotators' (optional) features through the GT and AP (optional) model.
 
         Parameters
         ----------
         x : torch.tensor of shape (batch_size, *)
             Sample features.
-        a : torch.tensor of shape (n_annotators, *), optional (default=None)
+        a : torch.tensor of shape (n_annotators, *), default=None
             Annotator features, which are None by default. In this case, only the samples are forward propagated
             through the GT model.
-        combs : torch.tensor of shape (n_combs, 2), optional (default=None)
+        combs : torch.tensor of shape (n_combs, 2), default=None
             If provided, this tensor determines the pairs of samples (indexed by `combs[:, 0]`) and annotators
-            (indexed by `combs[:, 1]`) to be propgated through the AP model.
+            (indexed by `combs[:, 1]`) to be propagated through the AP model.
 
         Returns
         -------
@@ -96,29 +126,36 @@ class AnnotMixModule(nn.Module):
 class AnnotMixClassifier(MaMLClassifier):
     """AnnotMixClassifier
 
-    This class implements the framework annot-mix , which trains a multi-annotator classifier using an extension of
-    mixup.
+    This class implements the framework annot-mix [1], which trains a multi-annotator classifier using an extension of
+    mixup [2].
 
     Parameters
     ----------
     network : AnnotMixModule
-        A network consisting of a ground truth and an annotator performance model.
-    alpha : float, optional (default=0.5)
+        A network consisting of a ground truth (AP) and an annotator performance (AP) model.
+    alpha : float, default=1.0
         Determines the parameters of the beta distribution used for sampling the mixup coefficients.
     mix_only_annotators : None or str, optional (default="x-a-mixup")
         Flag whether annotators are only mixed for the same sample.
-    optimizer : torch.optim.Optimizer.__class__, optional (default=AdamW)
-        Optimizer class responsible for optimizing the two networks' parameters. The `AdamW` optimizer is used by
-        default.
+    optimizer : torch.optim.Optimizer.__class__, optional (default=RAdam.__class__)
+        Optimizer class responsible for optimizing the GT and AP parameters. If `None`, the `RAdam` optimizer is used
+        by default.
     optimizer_gt_dict : dict, optional (default=None)
         Parameters passed to `optimizer` for the GT model.
     optimizer_ap_dict : dict, optional (default=None)
-        Parameters passed to `optimizer` for the AP model..
+        Parameters passed to `optimizer` for the AP model.
     lr_scheduler : torch.optim.lr_scheduler.LRScheduler.__class__, optional (default=None)
-        Learning rate scheduler responsible used during optimization of the two networks. No learning rate scheduler
-        is used by default.
+        Learning rate scheduler responsible for optimizing the GT and AP parameters. If `None`, no learning rate
+        scheduler is used by default.
     lr_scheduler_dict : dict, optional (default=None)
         Parameters passed to `lr_scheduler`.
+
+    References
+    ----------
+    [1] Herde, M., Lührs, L., Huseljic, D., & Sick, B. (2024). Annot-Mix: Learning with Noisy Class Labels from
+        Multiple Annotators via a Mixup Extension. arXiv:2405.03386.
+    [2] Zhang, H., Cisse, M., Dauphin, Y. N., & Lopez-Paz, D. (2018). mixup: Beyond Empirical Risk Minimization.
+        Int. Conf. Learn. Represent.
     """
 
     def __init__(
@@ -127,7 +164,7 @@ class AnnotMixClassifier(MaMLClassifier):
         alpha: float = 1.0,
         eta: float = 0.9,
         mix_only_annotators: bool = False,
-        optimizer: Optimizer.__class__ = AdamW,
+        optimizer: Optimizer.__class__ = RAdam,
         optimizer_gt_dict: Optional[dict] = None,
         optimizer_ap_dict: Optional[dict] = None,
         lr_scheduler: Optional[LRScheduler.__class__] = None,
@@ -155,6 +192,23 @@ class AnnotMixClassifier(MaMLClassifier):
         self.save_hyperparameters(logger=False)
 
     def training_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes the AnnotMix's loss.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        loss : torch.Float
+            Computed cross-entropy loss.
+        """
         # Get data.
         x, a, z = batch["x"], batch["a"], batch["z"]
         n_samples, n_annotators = x.shape[0], a.shape[1]
@@ -196,6 +250,29 @@ class AnnotMixClassifier(MaMLClassifier):
 
     @staticmethod
     def loss(z: torch.tensor, p_annot_log: torch.tensor):
+        """
+        Computes the cross-entropy loss between the observed annotations and the predicted annotation probabilities
+        according to the article [1].
+
+        Parameters:
+        -----------
+        z : torch.tensor of shape (n_samples, n_annotators)
+            Annotations, where `z[i,j]=c` indicates that annotator `j` provided class label `c` for sample
+            `i`. A missing label is denoted by `c=-1`.
+        p_annot_log : torch.tensor of shape (n_samples, n_annotators, n_classes)
+            Estimated annotation log-probabilities, where `p_annot_log[i,j,c]` refers to the estimated log-probability
+            for sample `i`, annotator `j`, and class `c`.
+
+        Returns
+        -------
+        loss : torch.Float
+            Computed cross-entropy loss.
+
+        References
+        ----------
+        [1] Herde, M., Lührs, L., Huseljic, D., & Sick, B. (2024). Annot-Mix: Learning with Noisy Class Labels from
+            Multiple Annotators via a Mixup Extension. arXiv:2405.03386.
+        """
         # Compute number of non-zero annotations.
         lmbda = z.sum(dim=-1)
         is_missing = lmbda == 0
@@ -208,6 +285,23 @@ class AnnotMixClassifier(MaMLClassifier):
 
     @torch.inference_mode()
     def predict_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes the GT and (optionally) AP models' predictions.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        predictions : dict
+            A dictionary of predictions fitting the expected structure of `maml.classifiers.MaMLClassifier`.
+        """
         self.eval()
         x = batch["x"]
         a = batch.get("a", None)
@@ -224,12 +318,28 @@ class AnnotMixClassifier(MaMLClassifier):
 
     @torch.no_grad()
     def get_gt_parameters(self):
+        """
+        Returns the list of parameters of the GT model.
+
+        Returns
+        -------
+        gt_parameters : list
+            The list of the GT models' parameters.
+        """
         gt_parameters = list(self.network.gt_embed_x.parameters())
         gt_parameters += list(self.network.gt_output.parameters())
         return gt_parameters
 
     @torch.no_grad()
     def get_ap_parameters(self):
+        """
+        Returns the list of parameters of the AP model.
+
+        Returns
+        -------
+        ap_parameters : list
+            The list of the AP models' parameters.
+        """
         ap_parameters = list(self.network.ap_embed_x.parameters())
         ap_parameters += list(self.network.ap_embed_a.parameters())
         ap_parameters += list(self.network.ap_hidden.parameters())

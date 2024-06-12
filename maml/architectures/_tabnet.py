@@ -6,6 +6,31 @@ from collections.abc import Iterable
 def gt_tabnet(
     n_classes: int, n_features: int, n_hidden_neurons: Union[int, Iterable] = 128, dropout_rate: float = 0.0
 ):
+    """
+    Creates a ground truth (GT) model as multi-layer perceptron, suited for learning with tabular data or as
+    classification head to a backbone.
+
+    Parameters
+    ----------
+    n_classes : int
+        Number of classes used for the classification head implemented as multi-layer perceptron (MLP) or linear layer.
+    n_features : int
+        Number of features of the input data.
+    n_hidden_neurons : int or list, default=129
+        Number of hidden neurons of the classification head. In case of an empty list, a linear layer is used as
+        classification head.
+    dropout_rate : float, default=True
+        Dropout rate used, if the classification head is an MLP.
+
+    Returns
+    -------
+    gt_embed_x : nn.Module
+        Architecture of the MLP excluding its last layer.
+    gt_output : nn.Module
+        Last layer of the created MLP.
+    n_hidden_neurons : int
+        Number of neurons in the MLP's penultimate layer.
+    """
     # Set list of neuron numbers.
     neuron_list = [n_features]
     if isinstance(n_hidden_neurons, int) and n_hidden_neurons > 0:

@@ -4,13 +4,52 @@ from torch import nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from typing import Literal, Optional
-from ..classifiers import AnnotMixModule, OuterProduct
 from ._resnet import gt_resnet
 from ._tabnet import gt_tabnet
 from ._dino import gt_dino
+from ..classifiers import AnnotMixModule, OuterProduct
 
-CLASSIFIER_NAMES = Literal["aggregate", "annot_mix", "conal", "crowdar", "madl", "trace_reg", "geo_reg_f", "geo_reg_w", "union_net", "crowd_layer"]
+CLASSIFIER_NAMES = Literal[
+    "aggregate",
+    "annot_mix",
+    "conal",
+    "crowdar",
+    "madl",
+    "trace_reg",
+    "geo_reg_f",
+    "geo_reg_w",
+    "union_net",
+    "crowd_layer",
+]
 ARCHITECTURE_NAMES = Literal["resnet", "tabnet", "dino"]
+
+
+def gt_net(gt_name: ARCHITECTURE_NAMES, gt_params_dict: dict):
+    """
+    Creates the architecture of the ground truth (GT) model.
+
+    Parameters
+    ----------
+    gt_name : str
+        Name of the GT model's architecture (cf. ARCHITECTURE_NAMES).
+    gt_params_dict : dict
+        Dictionary of parameters used for creating the respective GT models' architecture.
+
+    Returns
+    -------
+    gt_model : nn.Module
+        GT model's architecture as a Pytorch module.
+    """
+    # Get building block of the GT model.
+    if gt_name == "resnet":
+        gt_net_func = gt_resnet
+    elif gt_name == "tabnet":
+        gt_net_func = gt_tabnet
+    elif gt_name == "dino":
+        gt_net_func = gt_dino
+    else:
+        raise ValueError()
+    return gt_net_func(**gt_params_dict)
 
 
 def maml_net_params(
@@ -64,21 +103,14 @@ def maml_net_params(
         Dictionary of parameters to be passed to the class of the MAML classifier with the name `classifier_name`.
     """
     # Get building block of the GT model.
-    if gt_name == "resnet":
-        gt_net = gt_resnet
-    elif gt_name == "tabnet":
-        gt_net = gt_tabnet
-    elif gt_name == "dino":
-        gt_net = gt_dino
-    else:
-        raise ValueError()
-    gt_embed_x, gt_output, n_hidden_neurons = gt_net(**gt_params_dict)
+    gt_embed_x, gt_output, n_hidden_neurons = gt_net(gt_name, gt_params_dict)
 
     # Define parameters of the AP model.
     n_classes = gt_params_dict["n_classes"]
     params_dict = _ap_net_params(
         n_classes=n_classes,
         n_annotators=n_annotators,
+        annotators=annotators,
         classifier_name=classifier_name,
         n_hidden_neurons=n_hidden_neurons,
         embed_size=embed_size,
@@ -112,7 +144,8 @@ def maml_net_params(
         params_dict["n_annotators"] = n_annotators
     params_dict["optimizer"] = optimizer
     params_dict["optimizer_gt_dict"] = optimizer_gt_dict
-    params_dict["optimizer_ap_dict"] = optimizer_ap_dict
+    if classifier_name != "aggregate":
+        params_dict["optimizer_ap_dict"] = optimizer_ap_dict
     params_dict["lr_scheduler"] = lr_scheduler
     params_dict["lr_scheduler_dict"] = lr_scheduler_dict
     params_dict.update(classifier_specific)
@@ -124,6 +157,7 @@ def _ap_net_params(
     n_classes: int,
     n_annotators: int,
     n_hidden_neurons: int,
+    annotators: Optional[torch.tensor] = None,
     embed_size: Optional[int] = None,
 ):
     params_dict = {}
@@ -131,7 +165,8 @@ def _ap_net_params(
         return params_dict
 
     def ap_embed_a():
-        return nn.Linear(in_features=n_annotators, out_features=embed_size)
+        annot_dim = annotators.shape[1] if annotators is not None else n_annotators
+        return nn.Linear(in_features=annot_dim, out_features=embed_size)
 
     def ap_embed_x():
         return nn.Linear(in_features=n_hidden_neurons, out_features=embed_size)

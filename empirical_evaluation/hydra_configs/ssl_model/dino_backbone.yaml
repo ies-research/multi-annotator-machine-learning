@@ -1,0 +1,7 @@
+name: "dino"
+params:
+  repo_or_dir: "facebookresearch/dinov2"
+  model: "dinov2_vits14"
+  n_hidden_neurons: []
+  dropout_rate: 0.0
+  freeze_backbone: True

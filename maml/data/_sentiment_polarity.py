@@ -3,26 +3,20 @@ import numpy as np
 import os
 import pandas as pd
 
-from PIL import Image
+from skactiveml.utils import ExtLabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from torchvision.datasets import CIFAR10
 from torchvision.datasets.utils import download_and_extract_archive
-from torchvision.transforms import (
-    Compose,
-    Normalize,
-    RandomCrop,
-    RandomHorizontalFlip,
-    ToTensor,
-)
-
-from ._base import MultiAnnotatorDataset, AGGREGATION_METHODS, ANNOTATOR_FEATURES, TRANSFORMS, VERSIONS
 
 
-class CIFAR10H(MultiAnnotatorDataset):
-    """CIFAR10H
+from ._base import MultiAnnotatorDataset, ANNOTATOR_FEATURES, AGGREGATION_METHODS, TRANSFORMS, VERSIONS
 
-    The CIFAR10H [1] dataset features about 60,000 images of 10 classes, which have been annotated by 2,571 annotators
-    with an accuracy of about 95%.
+
+class SentimentPolarity(MultiAnnotatorDataset):
+    """SentimentPolarity
+
+    The SentimentPolarity [1] dataset features about 10,500 text files of 2 classes, which have been annotated by 203
+    annotators with an accuracy of about 79%.
 
     Parameters
     ----------
@@ -40,17 +34,16 @@ class CIFAR10H(MultiAnnotatorDataset):
         as aggregated annotations.
     transform : "auto" or torch.nn.Module, default="auto"
         Transforms for the samples, where "auto" used pre-defined transforms fitting the respective version.
-    n_annotators : int, default=2571
-        Controls the number of annotators, e.g., `n_annotators=100`, selects the 100 worst annotators.
 
     References
     ----------
-    [1] Peterson, J. C., Battleday, R. M., Griffiths, T. L., & Russakovsky, O. (2019). Human Uncertainty Makes
-        Classification More Robust. IEEE/CVF Int. Conf. Comput. Vis. (pp. 9617-9626).
+    [1] Rodrigues, F., Pereira, F., & Ribeiro, B. (2013). Learning from Multiple Annotators: Distinguishing Good from
+        Random Labelers. 	Pattern Recognit. Lett., 34(12), 1428-1436.
     """
 
-    url = "https://github.com/jcpeterson/cifar-10h/raw/master/data/cifar10h-raw.zip"
-    filename = "cifar10h-raw.zip"
+    base_folder = "sentiment_polarity"
+    url = "http://fprodrigues.com//mturk-datasets.tar.gz"
+    filename = "MTurkDatasets.tar.gz"
 
     def __init__(
         self,
@@ -58,70 +51,63 @@ class CIFAR10H(MultiAnnotatorDataset):
         version: VERSIONS = "train",
         annotators: ANNOTATOR_FEATURES = None,
         download: bool = False,
-        n_annotators: int = 2571,
         aggregation_method: AGGREGATION_METHODS = None,
         transform: TRANSFORMS = "auto",
     ):
         # Download data.
-        cifar10 = CIFAR10(
-            root=root,
-            train=(version != "train"),
-            download=download,
-        )
         if download:
-            download_and_extract_archive(CIFAR10H.url, root, filename=CIFAR10H.filename)
-
-        # Set transforms.
-        mean = (0.4914, 0.4822, 0.4465)
-        std = (0.2023, 0.1994, 0.2010)
-        if transform == "auto" and version == "train":
-            self.transform = Compose(
-                [
-                    RandomCrop(32, padding=4),
-                    RandomHorizontalFlip(),
-                    ToTensor(),
-                    Normalize(mean, std),
-                ]
-            )
-        elif transform == "auto" and version in ["valid", "test"]:
-            self.transform = Compose([ToTensor(), Normalize(mean, std)])
-        else:
-            self.transform = transform
+            download_and_extract_archive(SentimentPolarity.url, root, filename=SentimentPolarity.filename)
 
         # Check availability of data.
-        is_available = os.path.exists(os.path.join(root, CIFAR10H.filename))
+        is_available = os.path.exists(os.path.join(root, SentimentPolarity.base_folder))
         if not is_available:
             raise RuntimeError("Dataset not found. You can use `download=True` to download it.")
 
-        # Set samples and targets.
-        self.x = cifar10.data
-        self.y = torch.tensor(cifar10.targets).long()
+        # Load and prepare sample features as tensors.
+        folder = os.path.join(root, SentimentPolarity.base_folder)
 
-        # Load and prepare annotations as tensor for `version="train"`.
-        self.z = None
-        self.n_annotators = n_annotators
+        sc = None
+        if transform == "auto":
+            df = pd.read_csv(os.path.join(folder, "polarity_gold_lsa_topics.csv"), header=0)
+            sc = StandardScaler().fit(df.values[:, 1:-1].astype(np.float32))
         if version == "train":
-            annotations_file = os.path.join(root, CIFAR10H.filename)
-            df = pd.read_csv(annotations_file, header=0)
-            annotator_indices = df.annotator_id.unique()
-            n_samples = len(df.cifar10_test_test_idx.unique()) - 1
-            self.z = torch.full((n_samples, len(annotator_indices)), -1)
-            for a_idx in annotator_indices:
-                is_a = (df.annotator_id.values == a_idx) & (df.cifar10_test_test_idx != -99999)
-                y_a = np.array(df.chosen_label.values[is_a])
-                sample_idx_a = df.cifar10_test_test_idx.values[is_a]
-                self.z[sample_idx_a, a_idx] = torch.from_numpy(y_a).long()
-            n_correct = (self.z == self.y[:, None]).float().sum(dim=0)
-            n_labeled = (self.z != -1).float().sum(dim=0)
-            mean_performances = n_correct / n_labeled
-            sorted_annotators = mean_performances.argsort()
-            self.z = self.z[:, sorted_annotators[: self.n_annotators]]
+            df = pd.read_csv(os.path.join(folder, "polarity_gold_lsa_topics.csv"), header=0)
         elif version in ["valid", "test"]:
+            df = pd.read_csv(os.path.join(folder, "polarity_test_lsa_topics.csv"), header=0)
             valid_indices, test_indices = train_test_split(
-                torch.arange(len(self.x)), train_size=500, random_state=0, stratify=self.y
+                np.arange(len(df)), train_size=500, random_state=0, stratify=df["class"].values
             )
-            version_indices = valid_indices if version == "valid" else test_indices
-            self.x, self.y = self.x[version_indices], self.y[version_indices]
+            df = df.iloc[valid_indices] if version == "valid" else df.iloc[test_indices]
+        else:
+            raise ValueError("`version` must be in `['train', 'valid', 'test']`.")
+        self.x = df.values[:, 1:-1].astype(np.float32)
+
+        # Set transforms.
+        if isinstance(sc, StandardScaler):
+            self.x = sc.transform(self.x)
+            self.transform = None
+        else:
+            self.transform = transform
+        self.x = torch.from_numpy(self.x)
+
+        # Setup label encoder.
+        self.le = ExtLabelEncoder(classes=["pos", "neg"], missing_label="not-available")
+
+        # Load and prepare annotations as tensor.
+        self.z = None
+        if version == "train":
+            df_answers = pd.read_csv(os.path.join(folder, "mturk_answers.csv"), header=0)
+            annotator_indices = df_answers["WorkerId"].unique()
+            self.z = np.full((len(df), self.get_n_annotators()), fill_value="not-available").astype(str)
+            for row_idx, row in df_answers.iterrows():
+                sample_idx = np.where(df["id"].values == row["Input.id"])[0][0]
+                annotator_idx = np.where(annotator_indices == row["WorkerId"])[0][0]
+                self.z[sample_idx, annotator_idx] = row["Answer.sent"]
+            self.z = torch.from_numpy(self.le.fit_transform(self.z).astype(np.int64))
+
+        # Load and prepare true labels as tensor.
+        self.y = df["class"].values.astype(str)
+        self.y = torch.from_numpy(self.le.fit_transform(self.y).astype(np.int64))
 
         # Load and prepare annotator features as tensor if `annotators` is not `None`.
         self.a = self.prepare_annotator_features(annotators=annotators, n_annotators=self.get_n_annotators())
@@ -148,7 +134,7 @@ class CIFAR10H(MultiAnnotatorDataset):
         n_classes : int
             Number of classes.
         """
-        return 10
+        return 2
 
     def get_n_annotators(self):
         """
@@ -157,7 +143,7 @@ class CIFAR10H(MultiAnnotatorDataset):
         n_annotators : int
             Number of annotators.
         """
-        return self.n_annotators
+        return 203
 
     def get_annotators(self):
         """
@@ -180,8 +166,7 @@ class CIFAR10H(MultiAnnotatorDataset):
         sample : torch.tensor
             Sample with the given index.
         """
-        x = Image.fromarray(self.x[idx])
-        return self.transform(x) if self.transform else x
+        return self.transform(self.x[idx]) if self.transform else self.x[idx]
 
     def get_annotations(self, idx: int):
         """

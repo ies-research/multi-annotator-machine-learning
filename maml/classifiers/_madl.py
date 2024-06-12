@@ -1,7 +1,7 @@
 import math
 import torch
 
-from torch.optim import Optimizer, AdamW
+from torch.optim import Optimizer, RAdam
 from torch.optim.lr_scheduler import LRScheduler
 from torch.distributions import Gamma
 from torch import nn
@@ -24,7 +24,7 @@ class MaDLClassifier(MaMLClassifier):
     n_classes : int
         Number of classes
     gt_embed_x : nn.Module
-        Pytorch module of the GT model embedding the input samples.
+        Pytorch module the GT model' backbone embedding the input samples.
     gt_output : nn.Module
         Pytorch module of the GT model taking the embedding the samples as input to predict class-membership logits.
     ap_embed_a : nn.Module
@@ -57,20 +57,24 @@ class MaDLClassifier(MaMLClassifier):
               the confusion matrix is constructed,
             - 'full' corresponding to a vector (`n_classes * n_classes` output neurons for `ap_output`) from which
               the confusion matrix is constructed.
+    kernel : "rbf" or "cosine"
+        Name of the kernel function to be used.
     alpha : positive float, optional (default=1.25)
         First parameter of the Gamma distribution to regularize the value of `gamma` as bandwidth parameter of the
-        radial basis function. If it is None, no annotator weights are computed.
+        radial basis function or cosine kernel. If it is None, no annotator weights are computed.
     beta : positive float, optional (default=1.25)
         Second parameter of the Gamma distribution to regularize the value of `gamma` as bandwidth parameter of the
-        radial basis function. If it is None, no annotator weights are computed.
-    optimizer : torch.optim.Optimizer, optional (default=None)
-        Optimizer responsible for optimizing the GT and AP parameters. If None, the `AdamW` optimizer is used by
-        default.
-    optimizer_dict : dict, optional (default=None)
-        Parameters passed to `optimizer`.
-    lr_scheduler : torch.optim.lr_scheduler.LRScheduler, optional (default=None)
-        Optimizer responsible for optimizing the GT and AP parameters. If None, the `AdamW` optimizer is used by
-        default.
+        radial basis function or cosine kernel. If it is None, no annotator weights are computed.
+    optimizer : torch.optim.Optimizer.__class__, optional (default=RAdam.__class__)
+        Optimizer class responsible for optimizing the GT and AP parameters. If `None`, the `RAdam` optimizer is used
+        by default.
+    optimizer_gt_dict : dict, optional (default=None)
+        Parameters passed to `optimizer` for the GT model.
+    optimizer_ap_dict : dict, optional (default=None)
+        Parameters passed to `optimizer` for the AP model.
+    lr_scheduler : torch.optim.lr_scheduler.LRScheduler.__class__, optional (default=None)
+        Learning rate scheduler responsible for optimizing the GT and AP parameters. If `None`, no learning rate
+        scheduler is used by default.
     lr_scheduler_dict : dict, optional (default=None)
         Parameters passed to `lr_scheduler`.
     verbose : bool, optional (default=False)
@@ -78,8 +82,8 @@ class MaDLClassifier(MaMLClassifier):
 
     References
     ----------
-    [1] Herde, Marek, Huseljic, Denis, and Sick, Bernhard. "Mulit-annotator Deep Learning: A Modular Probabilistic
-        Framework for Classification." Transactions on Machine Learning Research, 2023.
+    [1] Herde, Marek, Huseljic, Denis, and Sick, Bernhard. "Multi-annotator Deep Learning: A Modular Probabilistic
+        Framework for Classification." Trans. Mach. Learn. Res., 2023.
     """
 
     def __init__(
@@ -96,10 +100,10 @@ class MaDLClassifier(MaMLClassifier):
         ap_use_residual: bool = True,
         eta: float = 0.8,
         confusion_matrix: Literal["scalar", "diagonal", "full"] = "full",
-        kernel: Literal["rbf", "cosine"] = "cosine",
+        kernel: Literal["rbf", "cosine"] = "rbf",
         alpha: Optional[float] = 1.25,
         beta: Optional[float] = 0.25,
-        optimizer: Optional[Optimizer.__class__] = AdamW,
+        optimizer: Optional[Optimizer.__class__] = RAdam,
         optimizer_gt_dict: Optional[dict] = None,
         optimizer_ap_dict: Optional[dict] = None,
         lr_scheduler: Optional[LRScheduler.__class__] = None,
@@ -157,26 +161,27 @@ class MaDLClassifier(MaMLClassifier):
         self.annot_weights = None
 
     def forward(
-            self,
-            x: torch.tensor,
-            a: Optional[torch.tensor] = None,
-            combs: Union[str, None, torch.tensor] = "full"
+        self, x: torch.tensor, a: Optional[torch.tensor] = None, combs: Union[str, None, torch.tensor] = "full"
     ):
-        """Forward propagation of samples' and annotators' (optional) features through the GT and AP (optional) model.
+        """
+        Forward propagation of samples' and annotators' (optional) features through the GT and AP (optional) model.
 
         Parameters
         ----------
-        x : torch.Tensor of shape (batch_size, *)
+        x : torch.tensor of shape (batch_size, *)
             Sample features.
-        a : torch.Tensor of shape (n_annotators, *), optional (default=None)
+        a : torch.tensor of shape (n_annotators, *), optional (default=None)
             Annotator features, which are None by default. In this case, only the samples are forward propagated
             through the GT model.
+        combs : torch.tensor of shape (n_combs, 2), default=None
+            If provided, this tensor determines the pairs of samples (indexed by `combs[:, 0]`) and annotators
+            (indexed by `combs[:, 1]`) to be propagated through the AP model.
 
         Returns
         -------
-        logits_class : torch.Tensor of shape (batch_size, n_classes)
+        logits_class : torch.tensor of shape (batch_size, n_classes)
             Class-membership logits.
-        ap_confs : torch.Tensor of shape (batch_size, n_annotators, n_classes, n_classes)
+        ap_confs : torch.tensor of shape (batch_size, n_annotators, n_classes, n_classes)
             Logits of conditional confusion matrices as proxies of the annotators' performances.
         """
         # Compute feature embedding for classifier.
@@ -252,6 +257,23 @@ class MaDLClassifier(MaMLClassifier):
         return logits_class, logits_perf
 
     def training_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes MaDL's loss.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        loss : torch.Float
+            Computed cross-entropy loss with regularization and annotator weights.
+        """
         # Get data.
         x, a, z = batch["x"], batch["a"], batch["z"]
         n_samples, n_annotators = x.shape[0], a.shape[1]
@@ -280,6 +302,23 @@ class MaDLClassifier(MaMLClassifier):
 
     @torch.inference_mode()
     def predict_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes the GT and (optionally) AP models' predictions.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        predictions : dict
+            A dictionary of predictions fitting the expected structure of `maml.classifiers.MaMLClassifier`.
+        """
         self.eval()
         x = batch["x"]
         a = batch.get("a", None)
@@ -296,6 +335,9 @@ class MaDLClassifier(MaMLClassifier):
 
     @torch.no_grad()
     def on_train_epoch_end(self):
+        """
+        Prints the annotator weights at the end of each epoch, if `self.verbose=True`.
+        """
         if self.verbose and self.annot_weights is not None:
             annotator_weights_str = ""
             for w_idx, w in enumerate(self.annot_weights):
@@ -320,8 +362,8 @@ class MaDLClassifier(MaMLClassifier):
         """
         Computes the loss of MaDL according to the article [1].
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         z : torch.tensor of shape (n_samples, n_annotators)
             Annotations, where `z[i,j]=c` indicates that annotator `j` provided class label `c` for sample
             `i`. A missing label is denoted by `c=-1`.
@@ -333,6 +375,22 @@ class MaDLClassifier(MaMLClassifier):
             annotator `j`, true class `c`, and annotation `k`.
         annot_weights : torch.tensor of shape (n_annotators,)
             Annotator weights, where `annot_weights[j]` refers to the weight of annotator `j`.
+        gamma : positive float, optional (default=1.25)
+            Bandwidth parameter of the radial basis function or cosine kernel.
+            If it is None, no regularization is applied
+        gamma_dist : positive float, optional (default=1.25)
+            Gamma distribution to regularize the value of `gamma` as bandwidth parameter. If it is None,
+            no regularization is applied.
+
+        Returns
+        -------
+        loss : torch.Float
+            Computed cross-entropy loss with regularization and annotator weights.
+
+        References
+        ----------
+        [1] Herde, Marek, Huseljic, Denis, and Sick, Bernhard. "Multi-annotator Deep Learning: A Modular Probabilistic
+            Framework for Classification." Trans. Mach. Learn. Res., 2023.
         """
         p_class_log = F.log_softmax(logits_class, dim=-1)
         p_perf_log = F.log_softmax(logits_perf, dim=-1)
@@ -358,12 +416,28 @@ class MaDLClassifier(MaMLClassifier):
 
     @torch.no_grad()
     def get_gt_parameters(self):
+        """
+        Returns the list of parameters of the GT model.
+
+        Returns
+        -------
+        gt_parameters : list
+            The list of the GT models' parameters.
+        """
         gt_parameters = list(self.gt_embed_x.parameters())
         gt_parameters += list(self.gt_output.parameters())
         return gt_parameters
 
     @torch.no_grad()
     def get_ap_parameters(self):
+        """
+        Returns the list of parameters of the AP model.
+
+        Returns
+        -------
+        ap_parameters : list
+            The list of the AP models' parameters.
+        """
         ap_parameters = list(self.ap_embed_x.parameters())
         ap_parameters += list(self.ap_embed_a.parameters())
         ap_parameters += list(self.ap_hidden.parameters())
@@ -410,11 +484,10 @@ class OuterProduct(nn.Module):
     References
     ----------
     [1] Qu, Y., Cai, H., Ren, K., Zhang, W., Yu, Y., Wen, Y. and Wang, J., 2016, December. Product-based neural
-        networks for user response prediction. In 2016 IEEE 16th international conference on data mining (ICDM)
+        networks for user response prediction. IEEE Int. Conf. Data Mining (ICDM)
         (pp. 1149-1154). IEEE.
     [2] Fiedler, James (GitHub username: jrfiedler). GitHub Repository: https://github.com/jrfiedler/xynn.
     [3] Fiedler, James. "Simple modifications to improve tabular neural networks." arXiv:2108.03214 (2021).
-
     """
 
     def __init__(self, embedding_size, output_size=10, device="cpu"):
@@ -427,12 +500,12 @@ class OuterProduct(nn.Module):
 
         Parameters
         ----------
-        x : torch.Tensor of shape (batch_size, n_fields, embedding_size)
+        x : torch.tensor of shape (batch_size, n_fields, embedding_size)
             Input to be transformed.
 
         Return
         ------
-        op: torch.Tensor of shape (batch_size, output_size)
+        op : torch.tensor of shape (batch_size, output_size)
             Input after outer product transformation.
         """
         # r = # batch size

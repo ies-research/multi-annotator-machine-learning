@@ -3,6 +3,14 @@ from omegaconf import DictConfig, ListConfig
 
 
 def log_params_from_omegaconf_dict(params: dict):
+    """
+    Logs the parameters in a dictionary via `mlflow`.
+
+    Parameters
+    ----------
+    params : dict
+        Dictionary of parameters to be logged via `mlflow`.
+    """
     for param_name, element in params.items():
         _explore_recursive(param_name, element)
 

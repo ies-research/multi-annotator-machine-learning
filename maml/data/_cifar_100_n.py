@@ -18,6 +18,33 @@ from ._base import MultiAnnotatorDataset, ANNOTATOR_FEATURES, AGGREGATION_METHOD
 
 
 class CIFAR100N(MultiAnnotatorDataset):
+    """CIFAR100N
+
+    The CIFAR100N [1] dataset features about 60,000 images of 100 classes, which have been annotated by 519 annotators
+    with an accuracy of about 60%.
+
+    Parameters
+    ----------
+    root : str
+        Path to the root directory, where the ata is located.
+    version : "train" or "valid" or "test", default="train"
+        Defines the version (split) of the dataset.
+    download : bool, default=False
+        Flag whether the dataset will be downloaded.
+    annotators : None or "index" or "one-hot" or "metadata"
+        Defines the representation of the annotators as either indices, one-hot encoded vectors, or`None`.
+    aggregation_method : str, default=None
+        Supported methods are majority voting (`aggregation_method="majority_vote") and returning the true class
+        labels (`aggregation_method="ground-truth"). In the case of `aggregation_method=None`, `None` is returned
+        as aggregated annotations.
+    transform : "auto" or torch.nn.Module, default="auto"
+        Transforms for the samples, where "auto" used pre-defined transforms fitting the respective version.
+
+    References
+    ----------
+    [1] Wei, J., Zhu, Z., Cheng, H., Liu, T., Niu, G., & Liu, Y. (2022). Learning with Noisy Labels
+        Revisited: A Study Using Real-World Human Annotations. Int. Conf. Learn. Represent.
+    """
 
     url_annotations = "https://github.com/UCSC-REAL/cifar-10-100n/raw/main/data/"
     annotations_filename = "CIFAR-100_human.pt"
@@ -87,9 +114,6 @@ class CIFAR100N(MultiAnnotatorDataset):
             annotation_file = os.path.join(root, CIFAR100N.annotations_filename)
             annotations = torch.load(annotation_file)
             self.z[np.arange(len(self.x)), annotator_ids] = torch.from_numpy(annotations["noisy_label"])
-            is_lbld = self.z != -1
-            print(is_lbld.float().sum(0).max())
-            print(((self.z != self.y[:, None]).float() * is_lbld.float()).sum() / is_lbld.float().sum())
         elif version in ["valid", "test"]:
             valid_indices, test_indices = train_test_split(
                 torch.arange(len(self.x)), train_size=500, random_state=0, stratify=self.y
@@ -97,37 +121,104 @@ class CIFAR100N(MultiAnnotatorDataset):
             version_indices = valid_indices if version == "valid" else test_indices
             self.x, self.y = self.x[version_indices], self.y[version_indices]
 
-        print(version)
-        print(len(self.y))
-        print(len(np.unique(self.y)))
-
         # Load and prepare annotator features as tensor if `annotators` is not `None`.
         self.a = self.prepare_annotator_features(annotators=annotators, n_annotators=self.get_n_annotators())
 
         # Aggregate annotations if `aggregation_method` is not `None`.
         self.z_agg = self.aggregate_annotations(z=self.z, y=self.y, aggregation_method=aggregation_method)
 
+        # Print statistics.
+        print(self)
+
     def __len__(self):
+        """
+        Returns
+        -------
+        length: int
+            Length of the dataset.
+        """
         return len(self.x)
 
     def get_n_classes(self):
+        """
+        Returns
+        -------
+        n_classes : int
+            Number of classes.
+        """
         return 100
 
     def get_n_annotators(self):
+        """
+        Returns
+        -------
+        n_annotators : int
+            Number of annotators.
+        """
         return 519
 
     def get_annotators(self):
+        """
+        Returns
+        -------
+        annotators : None or torch.tensor of shape (n_annotators, *)
+            Representation of the annotators, e.g., one-hot encoded vectors or metadata.
+        """
         return self.a
 
-    def get_sample(self, idx):
+    def get_sample(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        sample : torch.tensor
+            Sample with the given index.
+        """
         x = Image.fromarray(self.x[idx])
         return self.transform(x) if self.transform else x
 
-    def get_annotations(self, idx):
+    def get_annotations(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        annotations : torch.tensor
+            Annotations with the given index.
+        """
         return self.z[idx] if self.z is not None else None
 
-    def get_aggregated_annotation(self, idx):
+    def get_aggregated_annotation(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        aggregated_annotation : torch.tensor
+            Aggregated annotation with the given index.
+        """
         return self.z_agg[idx] if self.z_agg is not None else None
 
-    def get_true_label(self, idx):
+    def get_true_label(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        true_label : torch.tensor
+            True class label with the given index.
+        """
         return self.y[idx] if self.y is not None else None

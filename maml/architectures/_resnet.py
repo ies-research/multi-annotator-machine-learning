@@ -4,6 +4,34 @@ from torchvision.models import resnet18, resnet34, resnet50, resnet101, resnet15
 
 
 def gt_resnet(n_classes: int, variant: Literal[18, 34, 50, 101, 152], pretrained: bool = False, is_32_32: bool = True):
+    """
+    Creates a ground truth (GT) model with a ResNet [1] architecture.
+
+    Parameters
+    ----------
+    n_classes : int
+        Number of classes used for the classification head implemented as multi-layer perceptron (MLP) or linear layer.
+    variant : int
+        ResNet variant to be created.
+    pretrained : bool, default=False
+        Flag whether a pretrained ResNet is to be used.
+    is_32_32 : bool, default=False
+        Flag whether the architecture is to fit 32x32, e.g., to be used for datasets, such as CIFAR10.
+
+    Returns
+    -------
+    gt_embed_x : nn.Module
+        Backbone architecture of the ResNet model.
+    gt_output : nn.Module
+        Last layer of the created model.
+    n_hidden_neurons : int
+        Number of neurons in the model's penultimate layer.
+
+    References
+    ----------
+    [1] He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep Residual Learning for Image Recognition. IEEE Conf. Comput.
+        Vis. Pattern Recognit. (pp. 770-778).
+    """
     n_hidden_neurons = 512 if variant in [18, 34] else 2048
 
     def gt_embed_x():

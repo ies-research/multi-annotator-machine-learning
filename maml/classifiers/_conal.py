@@ -3,7 +3,7 @@ import torch
 
 from torch import nn
 from torch.nn import functional as F
-from torch.optim import Optimizer, AdamW
+from torch.optim import Optimizer, RAdam
 from torch.optim.lr_scheduler import LRScheduler
 from typing import Optional, Dict
 
@@ -21,34 +21,38 @@ class CoNALClassifier(MaMLClassifier):
     Parameters
     ----------
     n_classes : int
-        Number of classes
+        Number of classes.
+    annotators : torch.tensor of shape (n_annotators, n_annotator_features)
+        The matrix `A` is the annotator feature matrix. The exact form depends on the `module_class`.
+        If it is `None`, a one-hot encoding is used to differentiate between annotators.
     gt_embed_x : nn.Module
-        Pytorch module of the GT model embedding the input samples.
+        Pytorch module the GT model' backbone embedding the input samples.
+    gt_output : nn.Module
+        Pytorch module of the GT model taking the embedding the samples as input to predict class-membership logits.
     ap_embed_a : nn.Module
         Pytorch module of the AP model embedding the annotator features for the AP model.
     ap_embed_x : nn.Module, optional (default=None)
         Pytorch module of the AP model embedding samples.
-    annotators : torch.tensor of shape (n_annotators, n_annotator_features)
-        The matrix `A` is the annotator feature matrix. The exact form depends on the `module_class`.
-        If it is `None`, a one-hot encoding is used to differentiate between annotators.
     lmbda : float, optional (default=1e-5)
         Regularization parameter to enforce the common and individual confusion matrices of the annotators to be
         different.
-    optimizer : torch.optim.Optimizer, optional (default=None)
-        Optimizer responsible for optimizing the GT and AP parameters. If None, the `AdamW` optimizer is used by
-        default.
-    optimizer_dict : dict, optional (default=None)
-        Parameters passed to `optimizer`.
-    lr_scheduler : torch.optim.lr_scheduler.LRScheduler, optional (default=None)
-        Optimizer responsible for optimizing the GT and AP parameters. If None, the `AdamW` optimizer is used by
-        default.
+    optimizer : torch.optim.Optimizer.__class__, optional (default=RAdam.__class__)
+        Optimizer class responsible for optimizing the GT and AP parameters. If `None`, the `RAdam` optimizer is used
+        by default.
+    optimizer_gt_dict : dict, optional (default=None)
+        Parameters passed to `optimizer` for the GT model.
+    optimizer_ap_dict : dict, optional (default=None)
+        Parameters passed to `optimizer` for the AP model.
+    lr_scheduler : torch.optim.lr_scheduler.LRScheduler.__class__, optional (default=None)
+        Learning rate scheduler responsible for optimizing the GT and AP parameters. If `None`, no learning rate
+        scheduler is used by default.
     lr_scheduler_dict : dict, optional (default=None)
         Parameters passed to `lr_scheduler`.
 
     References
     ----------
     [1] Chu, Z., Ma, J., & Wang, H. (2021, May). Learning from Crowds by Modeling Common Confusions.
-        In AAAI (pp. 5832-5840).
+        In AAAI Int. Conf. Artif. Intell. (pp. 5832-5840).
     [2] Chu, Z (GitHub username: zdchu). GitHub Repository: https://github.com/zdchu/CoNAL.
     """
 
@@ -62,7 +66,7 @@ class CoNALClassifier(MaMLClassifier):
         ap_embed_x: nn.Module,
         ap_use_gt_embed_x: bool = True,
         lmbda: float = 1e-5,
-        optimizer: Optional[Optimizer.__class__] = AdamW,
+        optimizer: Optional[Optimizer.__class__] = RAdam,
         optimizer_gt_dict: Optional[dict] = None,
         optimizer_ap_dict: Optional[dict] = None,
         lr_scheduler: Optional[LRScheduler.__class__] = None,
@@ -141,6 +145,23 @@ class CoNALClassifier(MaMLClassifier):
         return p_class, logits_annot
 
     def training_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes CoNAL's loss.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        loss : torch.Float
+            Computed cross-entropy loss with regularization.
+        """
         _, logits_annot = self.forward(x=batch["x"], return_ap_outputs=True)
         loss = CoNALClassifier.loss(
             z=batch["z"],
@@ -153,6 +174,23 @@ class CoNALClassifier(MaMLClassifier):
 
     @torch.inference_mode()
     def predict_step(self, batch: Dict[str, torch.tensor], batch_idx: int, dataloader_idx: Optional[int] = 0):
+        """
+        Computes the GT and (optionally) AP models' predictions.
+
+        Parameters
+        ----------
+        batch : dict
+            Data batch fitting the dictionary structure of `maml.data.MultiAnnotatorDataset`.
+        batch_idx : int
+            Index of the batch in the dataset.
+        dataloader_idx : int, default=0
+            Index of the used dataloader.
+
+        Returns
+        -------
+        predictions : dict
+            A dictionary of predictions fitting the expected structure of `maml.classifiers.MaMLClassifier`.
+        """
         self.eval()
         a = batch.get("a", None)
         if a is None:
@@ -192,6 +230,11 @@ class CoNALClassifier(MaMLClassifier):
         lmbda : float, optional (default=1e-5)
             Parameter controlling the importance of the difference between the common confusion matrix and individual
             confusion matrices.
+
+        References
+        ----------
+        [1] Chu, Z., Ma, J., & Wang, H. (2021, May). Learning from Crowds by Modeling Common Confusions.
+        In AAAI Int. Conf. Artif. Intell. (pp. 5832-5840).
         """
         # Compute cross entropy for annotation probabilities according to the equation of final loss function in the
         # article [1].
@@ -205,12 +248,28 @@ class CoNALClassifier(MaMLClassifier):
 
     @torch.no_grad()
     def get_gt_parameters(self, **kwargs):
+        """
+        Returns the list of parameters of the GT model.
+
+        Returns
+        -------
+        gt_parameters : list
+            The list of the GT models' parameters.
+        """
         gt_parameters = list(self.gt_embed_x.parameters())
         gt_parameters += list(self.gt_output.parameters())
         return gt_parameters
 
     @torch.no_grad()
     def get_ap_parameters(self, **kwargs):
+        """
+        Returns the list of parameters of the AP model.
+
+        Returns
+        -------
+        ap_parameters : list
+            The list of the AP models' parameters.
+        """
         ap_parameters = list(self.ap_embed_a.parameters())
         ap_parameters += list(self.ap_embed_x.parameters())
         ap_parameters += list(self.ap_confs_common)

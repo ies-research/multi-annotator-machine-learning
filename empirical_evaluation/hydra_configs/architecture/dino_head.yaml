@@ -1,0 +1,5 @@
+name: "tabnet"
+params:
+  n_hidden_neurons: [128]
+  n_features: 384
+  dropout_rate: 0.5

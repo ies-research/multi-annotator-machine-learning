@@ -13,6 +13,33 @@ from ._base import MultiAnnotatorDataset, ANNOTATOR_FEATURES, AGGREGATION_METHOD
 
 
 class MusicGenres(MultiAnnotatorDataset):
+    """MusicGenres
+
+    The MusicGenres [1] dataset features 1,000 sound files of 10 classes, which have been annotated by 41 annotators
+    with an accuracy of about 56%.
+
+    Parameters
+    ----------
+    root : str
+        Path to the root directory, where the ata is located.
+    version : "train" or "valid" or "test", default="train"
+        Defines the version (split) of the dataset.
+    download : bool, default=False
+        Flag whether the dataset will be downloaded.
+    annotators : None or "index" or "one-hot" or "metadata"
+        Defines the representation of the annotators as either indices, one-hot encoded vectors, or`None`.
+    aggregation_method : str, default=None
+        Supported methods are majority voting (`aggregation_method="majority_vote") and returning the true class
+        labels (`aggregation_method="ground-truth"). In the case of `aggregation_method=None`, `None` is returned
+        as aggregated annotations.
+    transform : "auto" or torch.nn.Module, default="auto"
+        Transforms for the samples, where "auto" used pre-defined transforms fitting the respective version.
+
+    References
+    ----------
+    [1] Rodrigues, F., Pereira, F., & Ribeiro, B. (2013). Learning from Multiple Annotators: Distinguishing Good from
+        Random Labelers. 	Pattern Recognit. Lett., 34(12), 1428-1436.
+    """
 
     base_folder = "music_genre_classification"
     url = "http://fprodrigues.com//mturk-datasets.tar.gz"
@@ -102,26 +129,97 @@ class MusicGenres(MultiAnnotatorDataset):
         # Aggregate annotations if `aggregation_method` is not `None`.
         self.z_agg = self.aggregate_annotations(z=self.z, y=self.y, aggregation_method=aggregation_method)
 
+        # Print statistics.
+        print(self)
+
     def __len__(self):
+        """
+        Returns
+        -------
+        length: int
+            Length of the dataset.
+        """
         return len(self.x)
 
     def get_n_classes(self):
+        """
+        Returns
+        -------
+        n_classes : int
+            Number of classes.
+        """
         return 10
 
     def get_n_annotators(self):
+        """
+        Returns
+        -------
+        n_annotators : int
+            Number of annotators.
+        """
         return 44
 
     def get_annotators(self):
+        """
+        Returns
+        -------
+        annotators : None or torch.tensor of shape (n_annotators, *)
+            Representation of the annotators, e.g., one-hot encoded vectors or metadata.
+        """
         return self.a
 
-    def get_sample(self, idx):
+    def get_sample(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        sample : torch.tensor
+            Sample with the given index.
+        """
         return self.transform(self.x[idx]) if self.transform else self.x[idx]
 
-    def get_annotations(self, idx):
+    def get_annotations(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        annotations : torch.tensor
+            Annotations with the given index.
+        """
         return self.z[idx] if self.z is not None else None
 
-    def get_aggregated_annotation(self, idx):
+    def get_aggregated_annotation(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        aggregated_annotation : torch.tensor
+            Aggregated annotation with the given index.
+        """
         return self.z_agg[idx] if self.z_agg is not None else None
 
-    def get_true_label(self, idx):
+    def get_true_label(self, idx: int):
+        """
+        Parameters
+        ----------
+        idx : int
+            Sample index.
+
+        Returns
+        -------
+        true_label : torch.tensor
+            True class label with the given index.
+        """
         return self.y[idx] if self.y is not None else None
