@@ -1,0 +1,8 @@
+name: "union_net"
+class_definition:
+  _target_: maml.classifiers.UnionNetClassifier
+params:
+  epsilon: 1e-5
+annotators: "index"
+aggregation_method: null
+embed_size: null

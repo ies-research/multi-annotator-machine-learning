@@ -1,0 +1,5 @@
+name: "resnet"
+params:
+  variant: 18
+  pretrained: False
+  is_32_32: True

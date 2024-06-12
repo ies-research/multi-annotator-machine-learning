@@ -1,0 +1,162 @@
+<View>
+  <Text name="anker" value=""/>
+  <Header value="Self-assessment Questions: General" underline="true"/>
+  <Header value="How do you estimate the average accuracy [%] of the class label to which you assigned the highest label likelihood?" style="font-weight: normal; font-size: 18.5px"/>
+  <Number name="accuracy-number" toName="anker" min="0" max="100" required="true" requiredMessage="Estimate your accuracy."/>
+  <Header value="How would you rate the average qualitiy of your assigned label likelihoods?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="likelihood-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate your likelihoods' quality.">
+    <Choice value="Very poor" hint="Sehr schlecht"/>
+    <Choice value="Poor" hint="Schlecht"/>
+    <Choice value="Acceptable" hint="Annehmber"/>
+    <Choice value="Good" hint="Gut"/>
+    <Choice value="Very good" hint="Sehr gut"/>
+  </Choices>
+  <Header value="How would you rate your average concentration level?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="concentration-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate your concentration level.">
+    <Choice value="Very unconcentrated" hint="Sehr unkonzentriert"/>
+    <Choice value="Somewhat unconcentrated" hint="Eher unkonzentriert"/>
+    <Choice value="Neither unconcentrated nor concentrated" hint="Weder unkonzentriert noch konzentriert"/>
+    <Choice value="Somewhat concentrated" hint="Eher konzentriert"/>
+    <Choice value="Very concentrated" hint="Sehr konzentriert"/>
+  </Choices>
+  <Header value="How often did you look at the tutorial(s) while annotating?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="tutorial-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate your tutorial frequency.">
+    <Choice value="Never" hint="Nie"/>
+    <Choice value="Rarely" hint="Selten"/>
+    <Choice value="Sometimes" hint="Manchmal"/>
+    <Choice value="Often" hint="Oft"/>
+    <Choice value="Very often" hint="Sehr oft"/>
+  </Choices>
+  <Header value="How would you rate your average motivation level?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="motivation-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate your motivation level.">
+    <Choice value="Very unmotivated" hint="Sehr unmotiviert"/>
+    <Choice value="Somewhat unmotivated" hint="Eher unmotiviert"/>
+    <Choice value="Neither unmotivated nor motivated" hint="Weder unmotiviert noch motiviert"/>
+    <Choice value="Somewhat motivated" hint="Sehr motiviert"/>
+    <Choice value="Very motivated" hint="Sehr motiviert"/>
+  </Choices>
+  <Header value="Self-assessment Questions: Big Cats" underline="true"/>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Jaguar?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="jaguar-choice" toName="anker" choice="single" showInline="true" requiredMessage="Rate the Jaguar difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Leopard?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="leopard-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Leopard difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Cheetah?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="cheetah-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Cheetah difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="Self-assessment Questions: Hares and Rabbits" underline="true"/>
+  <Header name="brown-hare-header" value="How do you rate the average difficulty level of correctly identifying a Brown Hare?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="brown-hare-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Brown Hare difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Black-tailed Jackrabbit?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="black-tailed-jackrabbit-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Leopard difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Marsh Rabbit?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="marsh-rabbit-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Marsh Rabbit difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a European Rabbit?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="european-rabbit-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the European Rabbit difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Desert Cottontail?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="desert-cottontail-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Desert Cottontail difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="Self-assessment Questions: Squirrels" underline="true"/>
+  <Header value="How do you rate the average difficulty level of correctly identifying a Douglas' Squirrel?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="douglas-squirrel-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Douglas' Squirrel difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying an American Red Squirrel?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="american-red-squirrel-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Leopard difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header name="eurasian-red-squirrel-header" value="How do you rate the average difficulty level of correctly identifying a Eurasian Red Squirrel?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="eurasian-red-squirrel-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Eurasian Red Squirrel difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="Self-assessment Questions: Insects" underline="true"/>
+  <Header value="How do you rate the average difficulty level of correctly identifying an Asian Hornet?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="asian-hornet-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the Asian Hornet difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a European Hornet?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="european-hornet-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the European Hornet difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a European Paper Wasp?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="european-paper-wasp-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the European Paper Wasp difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+  <Header value="How do you rate the average difficulty level of correctly identifying a German Yellowjacket?" style="font-weight: normal; font-size: 18.5px"/>
+  <Choices name="german-yellowjacket-choice" toName="anker" choice="single" showInline="true" required="true" requiredMessage="Rate the German Yellowjacket difficulty level.">
+    <Choice value="Very easy" hint="Sehr einfach"/>
+    <Choice value="Somewhat easy" hint="Eher einfach"/>
+    <Choice value="Neither easy nor difficult" hint="Weder einfach noch schwierig"/>
+    <Choice value="Somewhat difficult" hint="Eher schwierig"/>
+    <Choice value="Very difficult" hint="Sehr schwierig"/>
+  </Choices>
+</View>

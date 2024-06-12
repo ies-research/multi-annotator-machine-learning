@@ -1,0 +1,9 @@
+name: "crowdar"
+class_definition:
+  _target_: maml.classifiers.CrowdARClassifier
+params:
+  ap_embed_dim_x: 128
+  lmbda: 0.9
+annotators: "index"
+aggregation_method: null
+embed_size: null

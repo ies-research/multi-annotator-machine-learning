@@ -1,0 +1,7 @@
+name: "crowd_layer"
+class_definition:
+  _target_: maml.classifiers.CrowdLayerClassifier
+params: null
+annotators: "index"
+aggregation_method: null
+embed_size: null

@@ -1,0 +1,13 @@
+name: "madl"
+class_definition:
+  _target_: maml.classifiers.MaDLClassifier
+params:
+  eta: 0.8
+  alpha: 1.25
+  beta: 0.25
+  kernel: "rbf"
+  confusion_matrix: "full"
+  ap_use_residual: True
+embed_size: 16
+annotators: "one-hot"
+aggregation_method: null

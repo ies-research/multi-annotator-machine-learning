@@ -1,0 +1,8 @@
+name: "conal"
+class_definition:
+  _target_: maml.classifiers.CoNALClassifier
+params:
+  lmbda: 1e-5
+embed_size: 20
+annotators: "one-hot"
+aggregation_method: null

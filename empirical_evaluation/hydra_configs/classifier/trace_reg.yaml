@@ -1,0 +1,9 @@
+name: "trace_reg"
+class_definition:
+  _target_: maml.classifiers.RegCrowdNetClassifier
+params:
+  regularization: "trace-reg"
+  lmbda: 0.01
+annotators: "index"
+aggregation_method: null
+embed_size: null

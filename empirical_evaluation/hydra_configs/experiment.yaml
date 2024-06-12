@@ -1,0 +1,11 @@
+defaults:
+  - data: dopanim
+  - classifier: annot_mix
+  - architecture: dino_head
+  - ssl_model: dino_backbone
+  - _self_
+experiment_name: "test"
+# TODO: Replace path for saving results via `mlflow`.
+mlruns_path: "."
+accelerator: "cpu"
+seed: 0
