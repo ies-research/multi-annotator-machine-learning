@@ -6,7 +6,7 @@ import os
 from abc import ABC, abstractmethod
 from torch.utils.data import Dataset, DataLoader
 from typing import Optional, Literal, Callable, Union
-from skactiveml.utils import majority_vote, rand_argmax
+from skactiveml.utils import majority_vote, rand_argmax, compute_vote_vectors
 
 AGGREGATION_METHODS = Optional[Literal["majority-vote", "ground-truth"]]
 ANNOTATOR_FEATURES = Optional[Literal["one-hot", "index"]]
@@ -197,10 +197,29 @@ class MultiAnnotatorDataset(Dataset, ABC):
             if z.ndim == 3:
                 mask = (z != -1).all(dim=-1, keepdim=True).float()
                 clean_prob_tensor = z * mask
-                summed_prob = clean_prob_tensor.sum(dim=1)
-                return torch.from_numpy(rand_argmax(summed_prob.numpy(), random_state=0, axis=1))
+                summed_proba = clean_prob_tensor.sum(dim=1)
+                proba = summed_proba / summed_proba.sum(dim=-1, keepdim=True)
+                class_labels = torch.from_numpy(rand_argmax(proba.numpy(), axis=-1, random_state=0))
             else:
-                return majority_vote(y=z, missing_label=-1, random_state=0)
+                class_labels = torch.from_numpy(majority_vote(y=z.numpy(), missing_label=-1, random_state=0))
+            return class_labels
+        elif aggregation_method in ["soft-majority-vote", "selection-frequency"]:
+            if z.ndim == 3:
+                mask = (z != -1).all(dim=-1, keepdim=True).float()
+                clean_prob_tensor = z * mask
+                summed_proba = clean_prob_tensor.sum(dim=1)
+                proba = summed_proba / summed_proba.sum(dim=-1, keepdim=True)
+            else:
+                votes = compute_vote_vectors(y=z.numpy(), missing_label=-1)
+                proba = torch.from_numpy(votes / votes.sum(axis=-1, keepdims=True))
+            if aggregation_method == "soft-majority-vote":
+                return proba
+            else:
+                selection_frequencies, _ = proba.max(dim=-1)
+                class_labels = torch.from_numpy(rand_argmax(proba.numpy(), axis=-1, random_state=0))
+                is_not_selected = selection_frequencies < 0.7
+                class_labels[is_not_selected] = -1
+                return class_labels
         else:
             raise ValueError("`aggregation_method` must be in ['majority-vote', 'ground-truth', None].")
 

@@ -128,14 +128,17 @@ def evaluate(cfg):
 
         # Build data loaders.
         dl_train = DataLoader(
-            dataset=ds_train, batch_size=cfg.data.train_batch_size, num_workers=cfg.data.num_workers, shuffle=True
+            dataset=ds_train,
+            batch_size=cfg.data.train_batch_size,
+            num_workers=cfg.data.num_workers,
+            shuffle=True,
+            drop_last=True
         )
         dl_train_eval = DataLoader(
             dataset=ds_train_eval, batch_size=cfg.data.eval_batch_size, num_workers=cfg.data.num_workers
         )
         dl_valid = DataLoader(dataset=ds_valid, batch_size=cfg.data.eval_batch_size, num_workers=cfg.data.num_workers)
         dl_test = DataLoader(dataset=ds_test, batch_size=cfg.data.eval_batch_size, num_workers=cfg.data.num_workers)
-
 
         # Create callbacks for progressbar and checkpointing.
         bar = RichProgressBar()
@@ -271,7 +274,6 @@ def evaluate(cfg):
                     ap_tce_name = f"ap_{version}_tce_{state}"
                     print(f"{ap_tce_name}: {ap_tce}")
                     log_metric(ap_tce_name, ap_tce)
-
 
 
 if __name__ == "__main__":

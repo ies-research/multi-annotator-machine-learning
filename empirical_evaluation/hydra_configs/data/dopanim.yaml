@@ -6,7 +6,7 @@ class_definition:
   download: False
 max_epochs: 50
 num_workers: 4
-train_batch_size: 32
+train_batch_size: 64
 eval_batch_size: 128
 optimizer:
   class_definition: torch.optim.RAdam

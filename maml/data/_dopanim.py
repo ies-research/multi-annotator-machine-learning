@@ -27,7 +27,7 @@ from ._base import MultiAnnotatorDataset, AGGREGATION_METHODS, TRANSFORMS, VERSI
 class Dopanim(MultiAnnotatorDataset):
     """Dopanim
 
-    The Dopanim [1] dataset features about 15,750 animal images of 15 classes, organized into four groups of
+    The dopanim [1, 2] dataset features about 15,750 animal images of 15 classes, organized into four groups of
     doppelganger animals and collected together with ground truth labels from iNaturalist. For approximately 10,500 of
     these images, 20 humans provided over 52,000 annotations with an accuracy of circa 67%.
 
@@ -56,13 +56,15 @@ class Dopanim(MultiAnnotatorDataset):
 
     References
     ----------
-    [1] Herde, M., Huseljic, D., Rauch, L., & Sick, B. (2024). dopanim: A Dataset of Doppelganger Animals with Noisy
-        Annotations from Multiple Humans [Data set]. Zenodo. https://doi.org/10.5281/zenodo.11479590
+    [1] Herde, M., Huseljic, D., Rauch, L., & Sick, B. (2024) dopanim: A Dataset of Doppelganger Animals with Noisy
+        Annotations from Multiple Humans. In NeurIPS: D & B Track.
+    [2] Herde, M., Huseljic, D., Rauch, L., & Sick, B. (2024). dopanim: A Dataset of Doppelganger Animals with Noisy
+        Annotations from Multiple Humans [Data set]. Zenodo. https://doi.org/10.5281/zenodo.11479589
     """
 
     base_folder = "dopanim_zenodo_download"
-    url = "https://zenodo.org/api/records/11479590/files-archive"
-    filename = "11479590.zip"
+    url = "https://zenodo.org/api/records/11479589/files-archive"
+    filename = "11479589.zip"
     image_dir = "images"
     classes = np.array(
         [
@@ -203,6 +205,15 @@ class Dopanim(MultiAnnotatorDataset):
 
         # Aggregate annotations if `aggregation_method` is not `None`.
         self.z_agg = self.aggregate_annotations(z=self.z, y=self.y, aggregation_method=aggregation_method)
+        if self.z_agg is not None:
+            is_labeled = self.z_agg != -1
+            if self.z_agg.ndim == 2:
+                is_labeled = is_labeled.all(dim=-1)
+            self.z_agg = self.z_agg[is_labeled]
+            self.y = self.y[is_labeled]
+            self.y_orig = self.y_orig[is_labeled]
+            self.z = self.z[is_labeled]
+            self.observation_ids = self.observation_ids[is_labeled]
 
         print(self)
 
