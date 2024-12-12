@@ -1,4 +1,13 @@
-# Multi-annotator Machine Learning
+<div align="center">
+  <img src="./docs/images/maml-logo.png" alt="logo" width="200">
+</div>
+
+# `maml`: Multi-annotator Machine Learning
+<a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
+<a href="https://www.pytorchlightning.ai/"><img alt="PyTorch Lightning" src="https://img.shields.io/badge/PyTorch_Lightning-792ee5?logo=pytorch-lightning&logoColor=white"></a>
+<a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
+<a href="https://ebooks.iospress.nl/doi/10.3233/FAIA240829"><img alt="annot-mix @ ECAI 2024" src="https://img.shields.io/badge/paper-annot--mix @ ECAI 2024-blue"></a>
+<a href="https://openreview.net/forum?id=XOGosbxLrz"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/paper-dopanim @ NeurIPS 2024-purple"></a>
 
 This project implements an ecosystem for multi-annotator learning approaches.
 
