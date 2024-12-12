@@ -107,7 +107,8 @@ class AggregateClassifier(MaMLClassifier):
         x, z_agg = batch["x"], batch["z_agg"]
 
         # One-hot encode aggregated annotations.
-        z_agg = F.one_hot(z_agg + 1, num_classes=self.n_classes + 1)[:, 1:].float()
+        if z_agg.ndim != 2:
+            z_agg = F.one_hot(z_agg + 1, num_classes=self.n_classes + 1)[:, 1:].float()
 
         # Perform mixup, if required.
         if self.alpha > 0:
