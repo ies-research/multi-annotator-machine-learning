@@ -21,7 +21,7 @@ class MultiAnnotatorDataset(Dataset, ABC):
     """
 
     def __getitem__(self, idx: int):
-        batch_dict = {"x": self.get_sample(idx)}
+        batch_dict = {"idx": idx, "x": self.get_sample(idx)}
         y = self.get_true_label(idx)
         if y is not None:
             batch_dict["y"] = y

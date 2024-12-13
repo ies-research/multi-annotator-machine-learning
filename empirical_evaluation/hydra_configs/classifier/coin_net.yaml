@@ -1,0 +1,9 @@
+name: "coin_net"
+class_definition:
+  _target_: maml.classifiers.RegCrowdNetClassifier
+params:
+  regularization: "coin-net"
+  lmbda: 1e-2
+annotators: "index"
+aggregation_method: null
+embed_size: null
