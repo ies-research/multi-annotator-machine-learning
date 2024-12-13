@@ -1,8 +1,90 @@
-# Multi-annotator Machine Learning
+# `dopanim`: A Dataset of Doppelganger Animals with Noisy Annotations from Multiple Humans :rabbit: :lion: :bee: :chipmunk: <br> @ NeurIPS 2024 
+<a href="https://doi.org/10.5281/zenodo.11479590"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.11479590.svg" alt="DOI"></a>
+<a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
+<a href="https://www.pytorchlightning.ai/"><img alt="PyTorch Lightning" src="https://img.shields.io/badge/PyTorch_Lightning-792ee5?logo=pytorch-lightning&logoColor=white"></a>
+<a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
+<a href="https://openreview.net/forum?id=XOGosbxLrz"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/Paper-dopanim @ NeurIPS 2024-purple"></a>
+> Authors: Marek Herde, Denis Huseljic, Lukas Rauch, and Bernhard Sick
 
-This project implements an ecosystem for multi-annotator learning approaches.
+This repository provides the code to reproduce all results and the data collection associated to the publication of 
+the `dopanim` dataset. The image below provides simplified illustration of the data types included by `dopanim`. 
+Two of three annotators provide probabilistic labels (after normalization) to identify the animal in the image. 
+In addition to these annotations, annotation times and annotator metadata, e.g., interest in zoology, are available.
 
-## Structure
+<div align="left">
+  <img src="./docs/images/dopanim-graphical-abstract.png" alt="logo" width="1000">
+</div>
+
+## Related Datasets :floppy_disk:	
+
+Below, you will find a comparison of `dopamine` to its most related datasets. Thereby, column headings indicate the names of 
+the datasets, whereas rows provide information regarding different attributes and statistics of the datasets. We denote
+counts by the # symbol and estimates by the ~ symbol.
+
+| **Dataset**         | `spc`                     | `mgc`                    | `labelme`       | `cifar10h`      | `cifar10n`      | `cifar100n`    | `dopanim`     |
+|-----------------|-------------------------|------------------------|---------------|---------------|---------------|--------------|-------------|
+| Authors  | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://aaai.org/papers/11506-deep-learning-from-crowds/)   | [Peterson<br> et al.](https://openaccess.thecvf.com/content_ICCV_2019/html/Peterson_Human_Uncertainty_Makes_Classification_More_Robust_ICCV_2019_paper.html) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Herde<br> et al.](https://openreview.net/forum?id=XOGosbxLrz)        |
+| Venue | PRL<br> (2013) | PRL<br> (2013) | AAAI<br> (2018) | CVPR<br> (2019) | ICLR<br> (2022) | ICLR<br> (2022) | NeurIPS<br> (2024) |
+| Data Modality   | text                    | sound                  | image         | image         | image         | image        | image       |
+| Training Instances [#] | 4,999           | 700                    | 1,000         | 10,000        | 50,000        | 50,000       | 10,484      |
+| Validation Instances [#] | :x:           | :x:                     | 500           | :x:            | :x:            | :x:           | 750         |
+| Test Instances [#] | 5,428               | 300                    | 1,188         | 50,000        | 10,000        | 10,000       | 4,500       |
+| Classes [#]     | 2                       | 10                     | 8             | 10            | 10            | 100          | 15          |
+| Annotators [#]  | 203                     | 42                     | 59            | 2,571         | 747           | 519          | 20          |
+| Annotation Platform | AMT                | AMT                    | AMT           | AMT           | AMT           | AMT          | LabelStudio |
+| Annotator Metadata | :x:                 | :x:                     | :x:            | :x:            | :x:            | :x:           | :white_check_mark:         |
+| Annotation Times | :x:                     | :x:                     | :x:            | :white_check_mark:           | :white_check_mark:           | :white_check_mark:          | :white_check_mark:         |
+| Soft Class Labels | :x:                    | :x:                     | :x:            | :x:            | :x:            | :x:           | :white_check_mark:         |
+| Annotations per Instance [#] | 5.6        | 4.2                   | 2.5           | 51.4          | 3.0           | 1.0          | 5.0         |
+| Annotations per Annotator [#] | 137       | 67                    | 43            | 200           | 201           | 96           | 2,602       |
+| Overall Accuracy [%] | 78.9              | 56.0                  | 74.0          | 94.9          | 82.3          | 59.8         | 67.3        |
+| Accuracy per Annotator [%] | 77.1         | 73.3                  | 69.2          | 94.9          | 82.1          | 55.6         | 65.6        |
+
+
+## Multi-annotator Learning Approaches :robot:
+
+Multi-annotator learning approaches estimate annotators' performances for improving neural networks' generalization performances during training:
+
+$$P(y_n, z_{nm} | x_n, a_m) = P(y_n | x_n) \times P(z_{nm} | x_n, a_m, y_n),$$
+
+where
+
+- $P(y_n | x_n)$ represents the class probabilities.
+- $Pr(z_{nm} | x_n, a_m, y_n)$ represents the confusion matrix.
+
+The approaches differ in their training and architectures to estimate these two quantities or proxies of them.
+
+
+| **Approach**    | **Authors**                                                                                             | **Venue (Year)**  | **Annotator Performance Model**                      | **Training**                          |
+|-------------|------------------------------------------------------------------------------------------------------|---------------|--------------------------------------------------|-----------------------------------|
+| `cl`          | [Rodrigues et al.](https://aaai.org/papers/11506-deep-learning-from-crowds/)                        | AAAI (2018)   | noise adaption layer per annotator               | cross-entropy                     |
+| `trace-reg`   | [Tanno et al.](https://openaccess.thecvf.com/content_CVPR_2019/html/Tanno_Learning_From_Noisy_Labels_by_Regularized_Estimation_of_Annotator_Confusion_CVPR_2019_paper.html) | CVPR (2019)   | confusion matrix per annotator                   | cross-entropy + regularization     |
+| `conal`       | [Chu et al.](https://ojs.aaai.org/index.php/AAAI/article/view/16730)                                | AAAI (2021)   | confusion matrix per and across annotators       | cross-entropy + regularization     |
+| `union-net`   | [Wei et al.](https://ieeexplore.ieee.org/document/9765651/)                                         | TNNLS (2022)  | noise adaption layer across annotators           | cross-entropy                     |
+| `geo-reg-w`   | [Ibrahim et al.](https://openreview.net/forum?id=_qVhsWyWB9)                                        | ICLR (2023)   | confusion matrix per annotator                   | cross-entropy + regularization     |
+| `geo-reg-f`   | [Ibrahim et al.](https://openreview.net/forum?id=_qVhsWyWB9)                                        | ICLR (2023)   | confusion matrix per annotator                   | cross-entropy + regularization     |
+| `madl`        | [Herde et al.](https://openreview.net/forum?id=MgdoxzImlK)                                          | TMLR (2023)   | confusion matrix per instance-annotator pair     | cross-entropy + regularization     |
+| `crowd-ar`    | [Cao et al.](https://dl.acm.org/doi/10.1145/3539618.3592007)                                        | SIGIR (2023)  | reliability scalar per instance-annotator pair   | two-model cross-entropy            |
+| `annot-mix`   | [Herde et al.](https://ebooks.iospress.nl/doi/10.3233/FAIA240829)                                   | ECAI (2024)   | confusion matrix per instance-annotator pair     | cross-entropy + mixup extension    |
+
+## Setup of Conda Environment :snake:
+As a prerequisite, we assume to have a Linux distribution as operating system. 
+
+1. Download a [`conda`](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) version to be installed on your machine. 
+2. Setup the environment via
+```bash
+projectpath$ conda env create -f environment.yml
+```
+3. Activate the new environment
+```bash
+projectpath$ conda activate maml
+```
+4. Verify that the `maml` (multi-annotator machine learning) environment was installed correctly:
+```bash
+projectpath$ conda env list
+```
+
+## Structure :classical_building:
 - [`data_collection`](data_collection): scripts to emulate or adjust our data collection, including the annotation 
   campaign via LabelStudio
   - [`label_studio_interfaces`](data_collection/label_studio_interfaces): scripts to perform
@@ -56,24 +138,7 @@ This project implements an ecosystem for multi-annotator learning approaches.
 - [`environment.yml`](environment.yml): file containing all package details to create a 
   [`conda`](https://conda.io/projects/conda/en/latest/) environment
 
-## Setup of Conda Environment
-As a prerequisite, we assume to have a Linux distribution as operating system. 
-
-1. Download a [`conda`](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) version to be installed on your machine. 
-2. Setup the environment via
-```bash
-projectpath$ conda env create -f environment.yml
-```
-3. Activate the new environment
-```bash
-projectpath$ conda activate maml
-```
-4. Verify that the `maml` (multi-annotator machine learning) environment was installed correctly:
-```bash
-projectpath$ conda env list
-```
-
-## Data Collection
+## Data Collection :clipboard:
 Based on the example of the [`dopanim`](https://doi.org/10.5281/zenodo.11479590) dataset, we provide scripts to 
 download task data from [iNaturalist](https://www.inaturalist.org/) and to annotate this data via
 [Label Studio](https://labelstud.io/).
@@ -107,7 +172,7 @@ The obtained batches can then be uploaded to [Label Studio](https://labelstud.io
 Furthermore, you can upload and employ the corresponding interfaces [`label_studio_interfaces`](data_collection/label_studio_interfaces).
 We refer to the documentation of [Label Studio](https://labelstud.io/) for understanding the exact steps of setting up the annotation platform.
 
-## Empirical Evaluation
+## Empirical Evaluation :bar_chart:
 
 We provide scripts and Jupyter notebooks to benchmark and visualize multi-annotator machine learning approaches
 on datasets annotated by multiple error-prone annotators. 
@@ -177,7 +242,7 @@ projectpath$ cd empirical_evaluation/jupyter_notebooks
 projectpath/empirical_evaluation/jupyter_notebooks$ jupyter-notebook annotation_times_active_learning.ipynb
 ```
 
-## Trouble Shooting
+## Trouble Shooting :rotating_light:
 If you encounter any problems, watch out for any `TODO` comments, which give hints or instructions to ensure the 
 functionality of the code. If the problems are still not resolved, feel free to create a corresponding GitHub issue
 or contact us directly via the e-mail [marek.herde@uni-kassel.de](mailto:marek.herde@uni-kassel.de)
