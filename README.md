@@ -33,7 +33,7 @@ where
 The approaches differ in their training and architectures to estimate these two quantities or proxies of them.
 
 
-| Approach    | Authors                                                                                             | Venue (Year)  | Annotator Performance Model                      | Training                          |
+| **Approach**    | **Authors**                                                                                             | **Venue (Year)**  | **Annotator Performance Model**                      | **Training**                          |
 |-------------|------------------------------------------------------------------------------------------------------|---------------|--------------------------------------------------|-----------------------------------|
 | `cl`          | [Rodrigues et al.](https://aaai.org/papers/11506-deep-learning-from-crowds/)                        | AAAI (2018)   | noise adaption layer per annotator               | cross-entropy                     |
 | `trace-reg`   | [Tanno et al.](https://openaccess.thecvf.com/content_CVPR_2019/html/Tanno_Learning_From_Noisy_Labels_by_Regularized_Estimation_of_Annotator_Confusion_CVPR_2019_paper.html) | CVPR (2019)   | confusion matrix per annotator                   | cross-entropy + regularization     |
@@ -50,9 +50,10 @@ The approaches differ in their training and architectures to estimate these two 
 
 Beyond implementing multi-annotator machine learning approaches, `maml` provides code to download and train with publicly available datasets annotated by multiple error-prone humans (e.g., crowdworkers). The table below lists the currently supported datasets, including their main characteristics. Some of these datasets also come with certain variants to emulate lower or higher levels of annotation noise, e.g., `cifar10n`, `cifar100n`, and `dopanim`.
 
-| Dataset         | `spc`                     | `mgc`                    | `labelme`       | `cifar10h`      | `cifar10n`      | `cifar100n`    | `dopanim`     |
+| **Dataset**         | `spc`                     | `mgc`                    | `labelme`       | `cifar10h`      | `cifar10n`      | `cifar100n`    | `dopanim`     |
 |-----------------|-------------------------|------------------------|---------------|---------------|---------------|--------------|-------------|
-| **Authors**  | Rodrigues et al. | Rodrigues et al. | Rodrigues et al. | Peterson et al. | Wei et al. | Wei et al. | Herde et al.        |
+| **Authors**  | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://aaai.org/papers/11506-deep-learning-from-crowds/)   | [Peterson<br> et al.](https://openaccess.thecvf.com/content_ICCV_2019/html/Peterson_Human_Uncertainty_Makes_Classification_More_Robust_ICCV_2019_paper.html) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Herde<br> et al.](https://openreview.net/forum?id=XOGosbxLrz)        |
+| **Venue** | PRL (2013) | PRL (2013) | AAAI (2018) | CVPR (2019) | ICLR (2022) | ICLR (2022) | NeurIPS (2024) |
 | **Data Modality**   | text                    | sound                  | image         | image         | image         | image        | image       |
 | **Training Instances [#]** | 4,999           | 700                    | 1,000         | 10,000        | 50,000        | 50,000       | 10,484      |
 | **Validation Instances [#]** | :x:           | :x:                     | 500           | :x:            | :x:            | :x:           | 750         |
