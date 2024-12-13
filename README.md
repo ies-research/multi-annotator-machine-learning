@@ -52,22 +52,22 @@ Beyond implementing multi-annotator machine learning approaches, `maml` provides
 
 | **Dataset**         | `spc`                     | `mgc`                    | `labelme`       | `cifar10h`      | `cifar10n`      | `cifar100n`    | `dopanim`     |
 |-----------------|-------------------------|------------------------|---------------|---------------|---------------|--------------|-------------|
-| **Authors**  | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://aaai.org/papers/11506-deep-learning-from-crowds/)   | [Peterson<br> et al.](https://openaccess.thecvf.com/content_ICCV_2019/html/Peterson_Human_Uncertainty_Makes_Classification_More_Robust_ICCV_2019_paper.html) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Herde<br> et al.](https://openreview.net/forum?id=XOGosbxLrz)        |
-| **Venue** | PRL<br> (2013) | PRL<br> (2013) | AAAI<br> (2018) | CVPR<br> (2019) | ICLR<br> (2022) | ICLR<br> (2022) | NeurIPS<br> (2024) |
-| **Data Modality**   | text                    | sound                  | image         | image         | image         | image        | image       |
-| **Training Instances [#]** | 4,999           | 700                    | 1,000         | 10,000        | 50,000        | 50,000       | 10,484      |
-| **Validation Instances [#]** | :x:           | :x:                     | 500           | :x:            | :x:            | :x:           | 750         |
-| **Test Instances [#]** | 5,428               | 300                    | 1,188         | 50,000        | 10,000        | 10,000       | 4,500       |
-| **Classes [#]**     | 2                       | 10                     | 8             | 10            | 10            | 100          | 15          |
-| **Annotators [#]**  | 203                     | 42                     | 59            | 2,571         | 747           | 519          | 20          |
-| **Annotation Platform** | AMT                | AMT                    | AMT           | AMT           | AMT           | AMT          | LabelStudio |
-| **Annotator Metadata** | :x:                 | :x:                     | :x:            | :x:            | :x:            | :x:           | :white_check_mark:         |
-| **Annotation Times** | :x:                     | :x:                     | :x:            | :white_check_mark:           | :white_check_mark:           | :white_check_mark:          | :white_check_mark:         |
-| **Soft Class Labels** | :x:                    | :x:                     | :x:            | :x:            | :x:            | :x:           | :white_check_mark:         |
-| **Annotations per Instance [#]** | 5.6        | 4.2                   | 2.5           | 51.4          | 3.0           | 1.0          | 5.0         |
-| **Annotations per Annotator [#]** | 137       | 67                    | 43            | 200           | 201           | 96           | 2,602       |
-| **Overall Accuracy [%]** | 78.9              | 56.0                  | 74.0          | 94.9          | 82.3          | 59.8         | 67.3        |
-| **Accuracy per Annotator [%]** | 77.1         | 73.3                  | 69.2          | 94.9          | 82.1          | 55.6         | 65.6        |
+| Authors  | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://www.sciencedirect.com/science/article/abs/pii/S016786551300202X) | [Rodrigues<br> et al.](https://aaai.org/papers/11506-deep-learning-from-crowds/)   | [Peterson<br> et al.](https://openaccess.thecvf.com/content_ICCV_2019/html/Peterson_Human_Uncertainty_Makes_Classification_More_Robust_ICCV_2019_paper.html) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Wei<br> et al.](https://openreview.net/forum?id=TBWA6PLJZQm) | [Herde<br> et al.](https://openreview.net/forum?id=XOGosbxLrz)        |
+| Venue | PRL<br> (2013) | PRL<br> (2013) | AAAI<br> (2018) | CVPR<br> (2019) | ICLR<br> (2022) | ICLR<br> (2022) | NeurIPS<br> (2024) |
+| Data Modality   | text                    | sound                  | image         | image         | image         | image        | image       |
+| Training Instances [#] | 4,999           | 700                    | 1,000         | 10,000        | 50,000        | 50,000       | 10,484      |
+| Validation Instances [#] | :x:           | :x:                     | 500           | :x:            | :x:            | :x:           | 750         |
+| Test Instances [#] | 5,428               | 300                    | 1,188         | 50,000        | 10,000        | 10,000       | 4,500       |
+| Classes [#]     | 2                       | 10                     | 8             | 10            | 10            | 100          | 15          |
+| Annotators [#]  | 203                     | 42                     | 59            | 2,571         | 747           | 519          | 20          |
+| Annotation Platform | AMT                | AMT                    | AMT           | AMT           | AMT           | AMT          | LabelStudio |
+| Annotator Metadata | :x:                 | :x:                     | :x:            | :x:            | :x:            | :x:           | :white_check_mark:         |
+| Annotation Times | :x:                     | :x:                     | :x:            | :white_check_mark:           | :white_check_mark:           | :white_check_mark:          | :white_check_mark:         |
+| Soft Class Labels | :x:                    | :x:                     | :x:            | :x:            | :x:            | :x:           | :white_check_mark:         |
+| Annotations per Instance [#] | 5.6        | 4.2                   | 2.5           | 51.4          | 3.0           | 1.0          | 5.0         |
+| Annotations per Annotator [#] | 137       | 67                    | 43            | 200           | 201           | 96           | 2,602       |
+| Overall Accuracy [%] | 78.9              | 56.0                  | 74.0          | 94.9          | 82.3          | 59.8         | 67.3        |
+| Accuracy per Annotator [%] | 77.1         | 73.3                  | 69.2          | 94.9          | 82.1          | 55.6         | 65.6        |
 
 ### Code Snippet :computer:
 The following code snippet exemplarily demonstrates how to train and test the multi-an:x:tator classifier crowd layer (`cl`) on the dataset music genres classification (`mgc`) via `maml`.
