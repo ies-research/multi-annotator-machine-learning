@@ -9,7 +9,41 @@
 <a href="https://ebooks.iospress.nl/doi/10.3233/FAIA240829"><img alt="annot-mix @ ECAI 2024" src="https://img.shields.io/badge/paper-annot--mix @ ECAI 2024-blue"></a>
 <a href="https://openreview.net/forum?id=XOGosbxLrz"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/paper-dopanim @ NeurIPS 2024-purple"></a>
 
-This project implements an ecosystem for multi-annotator learning approaches.
+This project implements an ecosystem for multi-annotator learning approaches, which aim at learning from data with
+noisy annotations provided by multiple error-prone (mostly human) annotators. This research area is also often 
+referred to as learning from crowds or learning from crowd-sourced labels. A graphical model describing this problem
+setting is given below.
+
+<div align="left">
+  <img src="./docs/images/maml-graphical-model.png" alt="logo" width="600">
+</div>
+
+
+## Multi-annotator Learning Approaches
+
+**Multi-annotator learning approaches** estimate annotators' performances for improving neural networks' generalization performances during training:
+
+$$P(y_n, z_{nm} | x_n, a_m) = P(y_n | x_n) \times P(z_{nm} | x_n, a_m, y_n),$$
+
+where
+
+- $P(y_n | x_n)$ represents the class probabilities.
+- $Pr(z_{nm} | x_n, a_m, y_n)$ represents the confusion matrix.
+
+The approaches differ in their training and architectures to estimate these two quantities or proxies of them.
+
+
+| Approach            | Authors            | Venue (Year)              | Annotator Performance Model                      | Training                           |
+|---------------------|--------------------|---------------------------|--------------------------------------------------|-------------------------------------|
+| `cl`                | Rodrigues et al.   | AAAI (2018)              | noise adaption layer per annotator               | cross-entropy                       |
+| `trace-reg`         | Tanno et al.       | CVPR (2019)              | confusion matrix per annotator                   | cross-entropy + regularization       |
+| `conal`             | Rodrigues et al.   | AAAI (2021)              | confusion matrix per and across annotators       | cross-entropy + regularization       |
+| `union-net`         | Wei et al.         | TNNLS (2022)             | noise adaption layer across annotators           | cross-entropy                       |
+| `geo-reg-w`         | Ibrahim et al.     | ICLR (2023)              | confusion matrix per annotator                   | cross-entropy + regularization       |
+| `geo-reg-f`         | Ibrahim et al.     | ICLR (2023)              | confusion matrix per annotator                   | cross-entropy + regularization       |
+| `madl`              | Herde et al.       | TMLR (2023)              | confusion matrix per instance-annotator pair     | cross-entropy + regularization       |
+| `crowd-ar`          | Cao et al.         | SIGIR (2023)             | reliability scalar per instance-annotator pair   | two-model cross-entropy              |
+| `annot-mix`         | Herde et al.       | ECAI (2024)              | confusion matrix per instance-annotator pair     | cross-entropy + mixup extension      |
 
 ## Structure
 - [`data_collection`](data_collection): scripts to emulate or adjust our data collection, including the annotation 
