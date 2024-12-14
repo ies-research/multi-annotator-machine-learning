@@ -44,7 +44,7 @@ The approaches differ in their training and architectures to estimate these two 
 | `madl`       | [Herde et al.](https://openreview.net/forum?id=MgdoxzImlK)                                                                                                                  | TMLR (2023)      | confusion matrix per instance-annotator pair                                       | cross-entropy + regularization  |
 | `crowd-ar`   | [Cao et al.](https://dl.acm.org/doi/10.1145/3539618.3592007)                                                                                                                | SIGIR (2023)     | reliability scalar per instance-annotator pair                                     | two-model cross-entropy         |
 | `annot-mix`  | [Herde et al.](https://ebooks.iospress.nl/doi/10.3233/FAIA240829)                                                                                                           | ECAI (2024)      | confusion matrix per instance-annotator pair                                       | cross-entropy + mixup extension |
-| `coint-net`  | [Nguyen et al.](https://ebooks.iospress.nl/doi/10.3233/FAIA240829)                                                                                                          | NeurIPS (2024)   | confusion matrix per annotator with instance- and-annotator-depenent outlier terms | cross-entropy + regularization  |
+| `coint-net`  | [Nguyen et al.](https://openreview.net/forum?id=HTLJptF7qM)                                                                                                          | NeurIPS (2024)   | confusion matrix per annotator with instance- and-annotator-depenent outlier terms | cross-entropy + regularization  |
 
 
 
