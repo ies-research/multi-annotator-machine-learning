@@ -41,7 +41,21 @@ counts by the # symbol and estimates by the ~ symbol.
 | Accuracy per Annotator [%] | 77.1         | 73.3                  | 69.2          | 94.9          | 82.1          | 55.6         | 65.6        |
 
 
-## Multi-annotator Learning Approaches :robot:
+## Variants of `dopanim`
+
+We create seven dataset variants (annotation subsets) of `dopanim` to test different learning scenarios. Two
+critical variables in multi-annotator learning are annotator performance and the number of annotations per instance.
+
+| `dopanim` Variant             | worst-1 | worst-2 | worst-v | rand-1 | rand-2 | rand-v | full  |
+|-------------------------------|---------|---------|---------|--------|--------|--------|-------|
+| Annotations per Instance [#]  | 1.0     | 2.0     | 3.0     | 1.0    | 2.0    | 3.0    | 5.0   |
+| Annotations per Annotator [#] | 524     | 1,048   | 1,555   | 524    | 1,048  | 1,564  | 2,602 |
+| Overall Accuracy [%]          | 22.4    | 37.3    | 54.8    | 67.5   | 67.2   | 67.3   | 67.3  |
+| Majority Voting Accuracy [%]  | 22.4    | 37.9    | 53.1    | 67.5   | 67.1   | 73.7   | 80.7  |
+| Accuracy per Annotator [%]    | 25.8    | 39.4    | 54.5    | 65.2   | 65.6   | 65.6   | 65.6  |
+
+
+## Benchmark: Multi-annotator Learning :robot:
 
 Multi-annotator learning approaches estimate annotators' performances for improving neural networks' generalization performances during training:
 
@@ -170,7 +184,12 @@ projectpath/data_collection/python_scripts$ python annotation_tasks.py --batches
 ```
 The obtained batches can then be uploaded to [Label Studio](https://labelstud.io/) to be manually assigned to certain annotators.
 Furthermore, you can upload and employ the corresponding interfaces [`label_studio_interfaces`](data_collection/label_studio_interfaces).
-We refer to the documentation of [Label Studio](https://labelstud.io/) for understanding the exact steps of setting up the annotation platform.
+An example of our interface is given below and we refer to the documentation of [Label Studio](https://labelstud.io/) for
+understanding the exact steps of setting up the annotation platform.
+
+<div align="left">
+  <img src="./docs/images/dopanim-annotation-interface.png" alt="logo" width="1000">
+</div>
 
 ## Empirical Evaluation :bar_chart:
 
