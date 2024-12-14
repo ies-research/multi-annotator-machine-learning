@@ -1,4 +1,4 @@
-# `dopanim`: A Dataset of Doppelganger Animals with Noisy Annotations from Multiple Humans :rabbit: :lion: :bee: :chipmunk: <br> @ NeurIPS 2024 
+# `dopanim`: A Dataset of Doppelganger Animals with Noisy Annotations from Multiple Humans <br> @ NeurIPS 2024 :rabbit: :lion: :bee: :chipmunk:
 <a href="https://doi.org/10.5281/zenodo.11479590"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.11479590.svg" alt="DOI"></a>
 <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 <a href="https://www.pytorchlightning.ai/"><img alt="PyTorch Lightning" src="https://img.shields.io/badge/PyTorch_Lightning-792ee5?logo=pytorch-lightning&logoColor=white"></a>
