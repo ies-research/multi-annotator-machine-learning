@@ -84,7 +84,7 @@ def insert_missing_annotations(
             annot_indices, p=p_select, size=n_annotations_per_sample[i], replace=False
         )
         mask[i][selected_annot_indices] = False
-    z[mask == True] = -1
+    z[mask] = -1
     return z
 
 

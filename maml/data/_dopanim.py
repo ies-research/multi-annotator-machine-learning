@@ -348,7 +348,8 @@ class Dopanim(MultiAnnotatorDataset):
             z = class_labels
         else:
             raise ValueError(
-                f"`annotation_type` must be in ['class-labels', 'probabilities'], got '{self.annotation_type}' instead."
+                f"`annotation_type` must be in ['class-labels', 'probabilities'], "
+                f"got '{self.annotation_type}' instead."
             )
         return Dopanim.mask_annotations(
             z=z,

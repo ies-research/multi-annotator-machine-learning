@@ -21,5 +21,5 @@ __all__ = [
     "MusicGenres",
     "SentimentPolarity",
     "Reuters",
-    "ImageNet15N"
+    "ImageNet15N",
 ]

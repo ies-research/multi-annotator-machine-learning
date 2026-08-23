@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from typing import Optional, Union, Tuple
+from typing import Optional, Union
 
 
 def dawid_skene_aggregation(

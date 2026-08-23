@@ -319,7 +319,7 @@ class AnnotMixClassifier(MaMLClassifier):
                 "p_class": p_class_log.exp(),
                 "p_perf": p_perf,
                 "p_conf": p_confusion_log.exp(),
-                "p_annot": p_annot
+                "p_annot": p_annot,
             }
 
     @torch.no_grad()

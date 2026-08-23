@@ -1,12 +1,10 @@
 import torch
 import numpy as np
 import os
-#import pandas as pd
 
 from skactiveml.utils import ExtLabelEncoder
 from sklearn.model_selection import train_test_split, KFold
 from torchvision.datasets.utils import download_and_extract_archive
-#from sentence_transformers import SentenceTransformer
 
 from ._base import MultiAnnotatorDataset, ANNOTATOR_FEATURES, AGGREGATION_METHODS, TRANSFORMS, VERSIONS
 
@@ -40,7 +38,7 @@ class SentimentPolarity(MultiAnnotatorDataset):
     References
     ----------
     [1] Rodrigues, F., Pereira, F., & Ribeiro, B. (2013). Learning from Multiple Annotators: Distinguishing Good from
-        Random Labelers. 	Pattern Recognit. Lett., 34(12), 1428-1436.
+        Random Labelers. Pattern Recognit. Lett., 34(12), 1428-1436.
     """
 
     base_folder = "sentiment_polarity"
@@ -73,31 +71,30 @@ class SentimentPolarity(MultiAnnotatorDataset):
 
         # Load and prepare sample features as numpy arrays.
         folder = os.path.join(root, SentimentPolarity.base_folder)
-        #df = pd.read_csv(os.path.join(folder, "mturk_answers.csv"), header=0)
-        #z_df = df.pivot(index='Input.id', columns='WorkerId', values='Answer.sent')
-        #z_df = z_df.fillna('not-available')
-        #z = z_df.to_numpy(str)
-        #df_samples = df.drop_duplicates(subset=['Input.id']).set_index('Input.id').sort_index()
-        #x = df_samples.loc[z_df.index, 'Input.original_sentence'].to_numpy(str)
-        #y = df_samples.loc[z_df.index, 'Input.true_sent'].to_numpy(str)
-        #model = SentenceTransformer('all-mpnet-base-v2').encode
-        #x_list = x.tolist()
-        #print(len(x))
-        #os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        #x = model(x_list, show_progress_bar=True)
-        #print(x.shape)
-        #y = self.le.fit_transform(y)
-        #z = self.le.fit_transform(z)
-        #np.savez(os.path.join(folder, "spc-all-mpnet-base-v2.npz"), x=x, y=y, z=z)
-        #print(folder)
+        data_file = os.path.join(folder, "spc-all-mpnet-base-v2.npz")
+        if not os.path.isfile(data_file):
+            import pandas as pd
+            from sentence_transformers import SentenceTransformer
+
+            df = pd.read_csv(os.path.join(folder, "mturk_answers.csv"), header=0)
+            z_df = df.pivot(index="Input.id", columns="WorkerId", values="Answer.sent")
+            z_df = z_df.fillna("not-available")
+            z = z_df.to_numpy(str)
+            df_samples = df.drop_duplicates(subset=["Input.id"]).set_index("Input.id").sort_index()
+            x = df_samples.loc[z_df.index, "Input.original_sentence"].to_numpy(str)
+            y = df_samples.loc[z_df.index, "Input.true_sent"].to_numpy(str)
+            model = SentenceTransformer("all-mpnet-base-v2").encode
+            x_list = x.tolist()
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
+            x = model(x_list, show_progress_bar=True)
+            y = self.le.fit_transform(y)
+            z = self.le.fit_transform(z)
+            np.savez(os.path.join(folder, "spc-all-mpnet-base-v2.npz"), x=x, y=y, z=z)
         data = np.load(os.path.join(folder, "spc-all-mpnet-base-v2.npz"))
         x, y, z = data["x"], data["y"], data["z"]
-        print(np.unique(y, return_counts=True))
 
         # Filter annotations and define number of annotators.
-        z = SentimentPolarity.mask_annotations(
-            z=z, y_true=y, variant=variant, n_variants=2, is_not_annotated=z == -1
-        )
+        z = SentimentPolarity.mask_annotations(z=z, y_true=y, variant=variant, n_variants=2, is_not_annotated=z == -1)
         provided_labels = np.sum(z != -1, axis=0) > 0
         z = z[:, provided_labels]
         self.n_annotators = z.shape[-1]
@@ -105,7 +102,11 @@ class SentimentPolarity(MultiAnnotatorDataset):
         # Decide for realistic data split or the one with ground truth labels.
         indices = {}
         indices["train"], indices["test"] = train_test_split(
-            np.arange(len(y)), train_size=3000, random_state=0, shuffle=True, stratify=y,
+            np.arange(len(y)),
+            train_size=3000,
+            random_state=0,
+            shuffle=True,
+            stratify=y,
         )
         if realistic_split is not None:
             if isinstance(realistic_split, float):
@@ -124,7 +125,7 @@ class SentimentPolarity(MultiAnnotatorDataset):
         self.x = torch.from_numpy(x[indices[version]]).float()
         self.y = torch.from_numpy(y[indices[version]]).long()
         if (version == "train" or realistic_split is not None) and version != "test":
-            self.z =  torch.from_numpy(z[indices[version]])
+            self.z = torch.from_numpy(z[indices[version]])
         else:
             self.z = None
 

@@ -1,12 +1,12 @@
 defaults:
-  - data: dopanim
-  - classifier: annot_mix
-  - architecture: dino_head
-  - ssl_model: dino_backbone
+  - data: music_genres
+  - classifier: coin_net
+  - architecture: tabnet_music_genres
+  - ssl_model: none
   - _self_
 experiment_name: "test"
 # TODO: Replace path for saving results via `mlflow`.
-mlruns_path: "."
+mlruns_path: ".test"
 accelerator: "cpu"
 seed: 0
 # TODO: Replace path for saving results via `hydra`.

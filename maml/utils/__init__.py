@@ -11,6 +11,7 @@ from ._visualizations import (
 )
 
 __all__ = [
+    "dawid_skene_aggregation",
     "cosine_kernel",
     "rbf_kernel",
     "insert_missing_annotations",

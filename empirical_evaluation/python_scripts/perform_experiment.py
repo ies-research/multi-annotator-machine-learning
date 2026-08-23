@@ -11,7 +11,7 @@ from lightning.pytorch.callbacks import RichProgressBar
 from mlflow import get_experiment_by_name, set_tracking_uri, log_metric, start_run, create_experiment, MlflowException
 from omegaconf.errors import ConfigAttributeError
 from pprint import pprint
-from skactiveml.utils import majority_vote, compute_vote_vectors, rand_argmax
+from skactiveml.utils import compute_vote_vectors, rand_argmax
 from torch import set_float32_matmul_precision
 from torch.utils.data import DataLoader
 from time import sleep

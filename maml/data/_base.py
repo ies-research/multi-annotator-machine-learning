@@ -354,7 +354,7 @@ class MultiAnnotatorDataset(Dataset, ABC):
                 if is_not_annotated[i].all():
                     continue
                 # Get the indices of ones in the current row
-                annotated_indices = np.where(is_not_annotated[i] == False)[0]
+                annotated_indices = np.where(~is_not_annotated[i])[0]
 
                 # Determine the size of the subset to set to zero
                 subset_size = random_state.randint(0, len(annotated_indices))

@@ -3,21 +3,9 @@ import pickle
 import torch
 import numpy as np
 import os
-import pandas as pd
 import requests
 
-from PIL import Image
 from sklearn.model_selection import train_test_split, KFold
-from torchvision.transforms import (
-    ToTensor,
-    Normalize,
-    Compose,
-    RandomResizedCrop,
-    RandomHorizontalFlip,
-    Resize,
-    CenterCrop,
-    RandomErasing,
-)
 from ._base import MultiAnnotatorDataset, ANNOTATOR_FEATURES, AGGREGATION_METHODS, TRANSFORMS, VERSIONS
 
 

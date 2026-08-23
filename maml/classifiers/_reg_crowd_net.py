@@ -4,26 +4,23 @@ from torch import nn
 from torch.nn import functional as F
 from torch.optim import Optimizer, RAdam
 from torch.optim.lr_scheduler import LRScheduler
-from typing import Optional, Dict, Literal, Union
+from typing import Optional, Dict, Literal
 
 from maml.classifiers._base import MaMLClassifier
 
 
 class MaskedParameter3D(nn.Module):
-    r"""Sparse learnable tensor :math:`\theta \in \mathbb{R}^{(N, A, C)}`.
+    r"""Sparse learnable tensor.
 
-    A compact alternative to a full ``(n_samples, n_annotators, n_classes)``
-    weight tensor where only a subset of *sample–annotator* pairs is
-    trainable.
+    A compact alternative to a full ``(n_samples, n_annotators, n_classes)`` weight tensor where only a subset
+    of *sample–annotator* pairs is trainable.
 
-    The subset is specified via a boolean *mask* of shape
-    ``(n_samples, n_annotators)``.  A ``True`` entry in the mask means that
-    the **entire row of classes** for that *⟨sample, annotator⟩* pair is
-    learnable, while ``False`` rows are treated as constant zeros and are not
-    stored in memory.
+    The subset is specified via a boolean *mask* of shape ``(n_samples, n_annotators)``.  A ``True`` entry in the mask
+    means that the **entire row of classes** for that *⟨sample, annotator⟩* pair is learnable, while ``False`` rows
+    are treated as constant zeros and are not stored in memory.
 
-    **Memory footprint** grows with ``mask.sum() * n_classes`` instead of the
-    full product ``n_samples * n_annotators * n_classes``.
+    **Memory footprint** grows with ``mask.sum() * n_classes`` instead of the full product
+    ``n_samples * n_annotators * n_classes``.
 
     Indexing in the *sample* dimension works like plain tensors, e.g.::
 
@@ -43,16 +40,15 @@ class MaskedParameter3D(nn.Module):
         Parameters
         ----------
         mask : torch.Tensor of dtype ``bool``
-            Boolean mask ``(n_samples, n_annotators)`` that selects the
-            trainable *⟨sample, annotator⟩* pairs.
+            Boolean mask ``(n_samples, n_annotators)`` that selects the trainable *⟨sample, annotator⟩* pairs.
         n_classes : int
-            Number of classes :math:`C` (width of each stored row).
+            Number of classes C (width of each stored row).
         init : {'zeros', 'normal', 'uniform'}, default ``'zeros'``
             Initialisation strategy for the compact parameter block.
 
-            * ``'zeros'`` – all weights are initialised to ``0``.
-            * ``'normal'`` – samples from :math:`\mathcal{N}(0, 0.02)`.
-            * ``'uniform'`` – samples from :math:`\mathcal{U}(-0.05, 0.05)`.
+            * 'zeros' - all weights are initialised to ``0``.
+            * 'normal' - samples from N(0, 0.02)`.
+            * 'uniform' - samples from U(-0.05, 0.05)`.
 
         Raises
         ------
@@ -68,13 +64,10 @@ class MaskedParameter3D(nn.Module):
 
         self.n_classes = int(n_classes)
 
-
         # (n_samples, n_annotators)  →  flat index or −1 sentinel
         index_mat = torch.full(mask.shape, -1, dtype=torch.long)
         true_pos = mask.nonzero(as_tuple=False)  # (K, 2)
-        index_mat[true_pos[:, 0], true_pos[:, 1]] = torch.arange(
-            true_pos.size(0), dtype=torch.long
-        )
+        index_mat[true_pos[:, 0], true_pos[:, 1]] = torch.arange(true_pos.size(0), dtype=torch.long)
         self.register_buffer("index_mat", index_mat)
 
         # compact learnable block
@@ -134,12 +127,6 @@ class MaskedParameter3D(nn.Module):
             * If *item* is an ``int``: returns a tensor of shape
               ``(n_annotators, n_classes)``.
             * Otherwise: returns ``(len(item), n_annotators, n_classes)``.
-
-        Examples
-        --------
-        >>> w[3]               # single sample → (A, C)
-        >>> w[[0, 2, 4]]       # fancy indexing → (3, A, C)
-        >>> w[1:5]             # slice → (4, A, C)
         """
         if isinstance(item, slice):
             item = torch.arange(
@@ -148,9 +135,7 @@ class MaskedParameter3D(nn.Module):
                 device=self.index_mat.device,
             )
         elif isinstance(item, int):
-            return self._dense_rows(
-                torch.tensor([item], device=self.index_mat.device)
-            )[0]  # drop batch dim
+            return self._dense_rows(torch.tensor([item], device=self.index_mat.device))[0]  # drop batch dim
         elif isinstance(item, (list, tuple)):
             item = torch.as_tensor(item, dtype=torch.long, device=self.index_mat.device)
 
@@ -166,10 +151,7 @@ class MaskedParameter3D(nn.Module):
         """
         n_samples, n_ann = self.index_mat.shape
         nnz = self.param.numel()
-        return (
-            f"sparse_shape=({n_samples}, {n_ann}, {self.n_classes}), "
-            f"nnz_elements={nnz}"
-        )
+        return f"sparse_shape=({n_samples}, {n_ann}, {self.n_classes}), " f"nnz_elements={nnz}"
 
 
 class RegCrowdNetClassifier(MaMLClassifier):
@@ -224,14 +206,15 @@ class RegCrowdNetClassifier(MaMLClassifier):
 
     References
     ----------
-    [1] Tanno et al., “Learning from noisy labels by regularized estimation
-        of annotator confusion,” CVPR 2019.
-    [2] Ibrahim et al., “Deep Learning From Crowdsourced Labels: Coupled
-        Cross‑Entropy Minimization, Identifiability, and Regularization,”
-        ICLR 2023.
-    [3] Nguyen et al., “Noisy Label Learning with Instance‑Dependent
-        Outliers: Identifiability via Crowd Wisdom,” NeurIPS 2024.
+    [1] Tanno, Ryutaro, Ardavan Saeedi, Swami Sankaranarayanan, Daniel C. Alexander, and Nathan Silberman.
+        "Learning from noisy labels by regularized estimation of annotator confusion." IEEE/CVF Conf. Comput. Vis.
+         Pattern Recognit., pp. 11244-11253. 2019.
+    [2] Ibrahim, Shahana, Tri Nguyen, and Xiao Fu. "Deep Learning From Crowdsourced Labels: Coupled Cross-Entropy
+        Minimization, Identifiability, and Regularization." Int. Conf. Learn. Represent. 2023.
+    [3] Tri Nguyen, Ibrahim, Shahana, and Xiao Fu. "Noisy Label Learning with Instance-Dependent Outliers:
+        Identifiability via Crowd Wisdom." Adv. Neural Inf. Process. Syst. 2024.
     """
+
     def __init__(
         self,
         n_classes: int,
@@ -368,7 +351,7 @@ class RegCrowdNetClassifier(MaMLClassifier):
                 "p_class": p_class_log.exp(),
                 "p_perf": p_perf,
                 "p_conf": p_confusion_log.exp(),
-                "p_annot": p_annot
+                "p_annot": p_annot,
             }
 
     @staticmethod
@@ -438,10 +421,10 @@ class RegCrowdNetClassifier(MaMLClassifier):
         e_outlier_err = 0
         if regularization == "coin-net":
             e_outlier = ap_outlier_terms - ap_outlier_terms.mean(dim=-1, keepdim=True)
-            e_outlier_err = (((e_outlier ** 2).sum(dim=(1, 2)) + 1e-10)**(0.5 * p)).sum()
+            e_outlier_err = (((e_outlier**2).sum(dim=(1, 2)) + 1e-10) ** (0.5 * p)).sum()
             e_outlier = e_outlier.reshape(-1, e_outlier.shape[-1])[is_lbld]
             p_annot = p_annot_log.exp() + e_outlier
-            p_annot = p_annot.clamp(min=1e-10, max=1-1e-10)
+            p_annot = p_annot.clamp(min=1e-10, max=1 - 1e-10)
             p_annot = p_annot / p_annot.sum(-1, keepdim=True)
             p_annot_log = p_annot.log()
 

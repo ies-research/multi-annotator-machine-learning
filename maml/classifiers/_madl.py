@@ -280,7 +280,7 @@ class MaDLClassifier(MaMLClassifier):
 
         # Compute all combinations of samples and annotators.
         combs = torch.cartesian_prod(
-            torch.arange(len(x), device=self.device), torch.arange(n_annotators, device=self.device)
+            torch.arange(n_samples, device=self.device), torch.arange(n_annotators, device=self.device)
         )
 
         # Prepare samples, annotators, and labels for training.
@@ -336,7 +336,7 @@ class MaDLClassifier(MaMLClassifier):
                 "p_class": p_class_log.exp(),
                 "p_perf": p_perf,
                 "p_conf": p_confusion_log.exp(),
-                "p_annot": p_annot
+                "p_annot": p_annot,
             }
 
     @torch.no_grad()

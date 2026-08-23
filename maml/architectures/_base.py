@@ -150,7 +150,16 @@ def maml_net_params(
     if classifier_name == "conal":
         params_dict["n_classes"] = n_classes
         params_dict["annotators"] = annotators
-    if classifier_name in ["trace_reg", "geo_reg_f", "geo_reg_w", "crowd_ar", "union_net_a", "union_net_b", "crowd_layer", "coin_net"]:
+    if classifier_name in [
+        "trace_reg",
+        "geo_reg_f",
+        "geo_reg_w",
+        "crowd_ar",
+        "union_net_a",
+        "union_net_b",
+        "crowd_layer",
+        "coin_net",
+    ]:
         params_dict["n_classes"] = n_classes
         params_dict["n_annotators"] = n_annotators
     if classifier_name == "coin_net":
