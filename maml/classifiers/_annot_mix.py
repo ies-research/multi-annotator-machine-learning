@@ -40,7 +40,7 @@ class AnnotMixModule(nn.Module):
     References
     ----------
     [1] Herde, M., Lührs, L., Huseljic, D., & Sick, B. (2024). Annot-Mix: Learning with Noisy Class Labels from
-        Multiple Annotators via a Mixup Extension. arXiv:2405.03386.
+        Multiple Annotators via a Mixup Extension. In ECAI Eur. Conf. Artif. Intell. (pp. 2910-2918).
     [2] Zhang, H., Cisse, M., Dauphin, Y. N., & Lopez-Paz, D. (2018). mixup: Beyond Empirical Risk Minimization.
         Int. Conf. Learn. Represent.
     """
@@ -153,7 +153,7 @@ class AnnotMixClassifier(MaMLClassifier):
     References
     ----------
     [1] Herde, M., Lührs, L., Huseljic, D., & Sick, B. (2024). Annot-Mix: Learning with Noisy Class Labels from
-        Multiple Annotators via a Mixup Extension. arXiv:2405.03386.
+        Multiple Annotators via a Mixup Extension. In ECAI Eur. Conf. Artif. Intell. (pp. 2910-2918).
     [2] Zhang, H., Cisse, M., Dauphin, Y. N., & Lopez-Paz, D. (2018). mixup: Beyond Empirical Risk Minimization.
         Int. Conf. Learn. Represent.
     """
@@ -271,7 +271,7 @@ class AnnotMixClassifier(MaMLClassifier):
         References
         ----------
         [1] Herde, M., Lührs, L., Huseljic, D., & Sick, B. (2024). Annot-Mix: Learning with Noisy Class Labels from
-            Multiple Annotators via a Mixup Extension. arXiv:2405.03386.
+            Multiple Annotators via a Mixup Extension. In ECAI Eur. Conf. Artif. Intell. (pp. 2910-2918).
         """
         # Compute number of non-zero annotations.
         lmbda = z.sum(dim=-1)
