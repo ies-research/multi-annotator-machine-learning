@@ -96,6 +96,7 @@ def write_commands(
     slurm_logs_path: str = "slurm_logs",
     max_param_configs: int = 900,
     partition: str = "main",
+    walltime: str = "24:00:00",
 ):
     """
     Writes Bash scripts for the experiments, splitting the parameter configurations across multiple files
@@ -122,6 +123,10 @@ def write_commands(
     max_param_configs : int
         Maximum number of parameter configurations to include per file.
         If the total number of parameter configurations exceeds this number, multiple files are created.
+    partition : str
+        Name of the partition on which the experiments are executed. Only used if `use_slurm=True`.
+    walltime : str
+        Maximum runtime allocated for each experiment as `HH:MM:SS`. Only used if `use_slurm=True`.
     """
     from itertools import product
     import os
@@ -162,7 +167,7 @@ def write_commands(
                         f"#SBATCH --mem={mem}",
                         f"#SBATCH --ntasks=1",
                         f"#SBATCH --get-user-env",
-                        f"#SBATCH --time=24:00:00",
+                        f"#SBATCH --time={walltime}",
                         f"#SBATCH --cpus-per-task={cpus_per_task}",
                         f"#SBATCH --partition={partition}",
                         f"#SBATCH --output={slurm_logs_path}/{cfg_dict['experiment_name']}_%A_%a.log",
@@ -216,6 +221,10 @@ if __name__ == "__main__":
     # You need to execute the script, with each of these experiment types to reproduce all results.
     experiment_type = "hyperparameter_search"
 
+    # Flag whether the additional dataset variants for studying the architecture's search space, i.e., the
+    # number of hidden neurons, are to be included. It can be combined with each of the experiment types above.
+    include_architecture_search = False
+
     # Path to the Python file `perform_experiment.py`.
     path_python_file = "/mnt/home/mherde/projects/github/multi-annotator-machine-learning/empirical_evaluation/python_scripts/perform_experiment.py"
 
@@ -254,6 +263,9 @@ if __name__ == "__main__":
 
     # SLURM parameter specifying on which partition the experiments are performed.
     partition = "main"
+
+    # SLURM parameter for limiting the maximum runtime per job.
+    walltime = "72:00:00"
 
     # ---------------------------------- Define general experimental setup. ----------------------------------
     seed_list = list(range(5))
@@ -514,6 +526,109 @@ if __name__ == "__main__":
             "variant": "rand-var",
         },
     }
+    if include_architecture_search:
+        data_set_dict.update(
+            {
+                "label_me_architecture_full": {
+                    "seed": 9,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "full",
+                },
+                "label_me_architecture_worst-1": {
+                    "seed": 23,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "worst-1",
+                },
+                "label_me_architecture_worst-2": {
+                    "seed": 24,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "worst-2",
+                },
+                "label_me_architecture_worst-var": {
+                    "seed": 25,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "worst-var",
+                },
+                "label_me_architecture_rand-1": {
+                    "seed": 26,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "rand-1",
+                },
+                "label_me_architecture_rand-2": {
+                    "seed": 27,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "rand-2",
+                },
+                "label_me_architecture_rand-var": {
+                    "seed": 28,
+                    "data": "label_me",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "rand-var",
+                },
+                "dopanim_arch_full": {
+                    "seed": 6,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "full",
+                },
+                "dopanim_arch_worst-1": {
+                    "seed": 0,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "worst-1",
+                },
+                "dopanim_arch_worst-2": {
+                    "seed": 1,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "worst-2",
+                },
+                "dopanim_arch_worst-var": {
+                    "seed": 2,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "worst-var",
+                },
+                "dopanim_arch_rand-1": {
+                    "seed": 3,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "rand-1",
+                },
+                "dopanim_arch_rand-2": {
+                    "seed": 4,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "rand-2",
+                },
+                "dopanim_arch_rand-var": {
+                    "seed": 5,
+                    "data": "dopanim",
+                    "architecture": "dino_head",
+                    "ssl_model": "dino_backbone",
+                    "variant": "rand-var",
+                },
+            }
+        )
 
     # ----------------------------------- Define search spaces for hyperparameters. -----------------------------------
     if experiment_type == "hyperparameter_search":
@@ -530,6 +645,13 @@ if __name__ == "__main__":
                 "data.optimizer.ap_params.weight_decay": [0],
                 "architecture.params.dropout_rate": uniform(0, 0.5),
             }
+            if "_arch" in key:
+                data_set_dict[key]["hp_ranges"]["architecture.params.n_hidden_neurons"] = [
+                    "\\[256\\]",
+                    "\\[512\\]",
+                    "\\[256,128\\]",
+                    "\\[512,256\\]",
+                ]
     elif experiment_type == "default_data":
 
         data_set_dict["dopanim_worst-1"]["hp_ranges"] = {
@@ -887,6 +1009,162 @@ if __name__ == "__main__":
             "architecture.params.dropout_rate": [0.4173331866040826],
         }
 
+        if include_architecture_search:
+            data_set_dict["label_me_architecture_worst-1"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0005130503983185],
+                "data.optimizer.gt_params.weight_decay": [0.0002276182433349],
+                "data.optimizer.ap_params.lr": [0.0005130503983185],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [16],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.2788708074949682],
+                "architecture.params.n_hidden_neurons": ["\\[512,256\\]"],
+            }
+            data_set_dict["label_me_architecture_worst-2"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0010397615183314],
+                "data.optimizer.gt_params.weight_decay": [0.0001560690120872],
+                "data.optimizer.ap_params.lr": [0.0010397615183314],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [32],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.436558817513287],
+                "architecture.params.n_hidden_neurons": ["\\[256\\]"],
+            }
+            data_set_dict["label_me_architecture_worst-var"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0734138117391346],
+                "data.optimizer.gt_params.weight_decay": [0.0001572136441878],
+                "data.optimizer.ap_params.lr": [0.0734138117391346],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [64],
+                "data.max_epochs": [5],
+                "data.lr_scheduler.params.T_max": [5],
+                "architecture.params.dropout_rate": [0.4566995752975344],
+                "architecture.params.n_hidden_neurons": ["\\[256,128\\]"],
+            }
+            data_set_dict["label_me_architecture_rand-1"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0054102810090104],
+                "data.optimizer.gt_params.weight_decay": [2.777755427162105e-06],
+                "data.optimizer.ap_params.lr": [0.0054102810090104],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [64],
+                "data.max_epochs": [50],
+                "data.lr_scheduler.params.T_max": [50],
+                "architecture.params.dropout_rate": [0.3365827682428062],
+                "architecture.params.n_hidden_neurons": ["\\[256\\]"],
+            }
+            data_set_dict["label_me_architecture_rand-2"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.015100429061989],
+                "data.optimizer.gt_params.weight_decay": [1.992223687503495e-06],
+                "data.optimizer.ap_params.lr": [0.015100429061989],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [32],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.4389850916340947],
+                "architecture.params.n_hidden_neurons": ["\\[256\\]"],
+            }
+            data_set_dict["label_me_architecture_rand-var"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0002275472872374],
+                "data.optimizer.gt_params.weight_decay": [0.000150519438166],
+                "data.optimizer.ap_params.lr": [0.0002275472872374],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [16],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.1978603121824562],
+                "architecture.params.n_hidden_neurons": ["\\[512,256\\]"],
+            }
+            data_set_dict["label_me_architecture_full"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0091140754772402],
+                "data.optimizer.gt_params.weight_decay": [1.677335634177878e-06],
+                "data.optimizer.ap_params.lr": [0.0091140754772402],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [32],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.3740737354382872],
+                "architecture.params.n_hidden_neurons": ["\\[256\\]"],
+            }
+            data_set_dict["dopanim_arch_worst-1"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0057171081597956],
+                "data.optimizer.gt_params.weight_decay": [3.0574501554216937e-05],
+                "data.optimizer.ap_params.lr": [0.0057171081597956],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [16],
+                "data.max_epochs": [50],
+                "data.lr_scheduler.params.T_max": [50],
+                "architecture.params.dropout_rate": [0.4439720525406301],
+                "architecture.params.n_hidden_neurons": ["\\[256\\]"],
+            }
+            data_set_dict["dopanim_arch_worst-2"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0006749945202235],
+                "data.optimizer.gt_params.weight_decay": [2.02949227364724e-05],
+                "data.optimizer.ap_params.lr": [0.0006749945202235],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [16],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.28191873524338],
+                "architecture.params.n_hidden_neurons": ["\\[512\\]"],
+            }
+            data_set_dict["dopanim_arch_worst-var"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.000318811225382],
+                "data.optimizer.gt_params.weight_decay": [5.545764193953783e-05],
+                "data.optimizer.ap_params.lr": [0.000318811225382],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [16],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.2139224410057068],
+                "architecture.params.n_hidden_neurons": ["\\[512,256\\]"],
+            }
+            data_set_dict["dopanim_arch_rand-1"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0075106780574177],
+                "data.optimizer.gt_params.weight_decay": [4.196000496395599e-05],
+                "data.optimizer.ap_params.lr": [0.0075106780574177],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [32],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.1386176301166415],
+                "architecture.params.n_hidden_neurons": ["\\[512\\]"],
+            }
+            data_set_dict["dopanim_arch_rand-2"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0008673667998015],
+                "data.optimizer.gt_params.weight_decay": [1.0826444345266952e-05],
+                "data.optimizer.ap_params.lr": [0.0008673667998015],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [32],
+                "data.max_epochs": [50],
+                "data.lr_scheduler.params.T_max": [50],
+                "architecture.params.dropout_rate": [0.469015512149781],
+                "architecture.params.n_hidden_neurons": ["\\[512,256\\]"],
+            }
+            data_set_dict["dopanim_arch_rand-var"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0002569503196045],
+                "data.optimizer.gt_params.weight_decay": [0.0001308343084307],
+                "data.optimizer.ap_params.lr": [0.0002569503196045],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [16],
+                "data.max_epochs": [30],
+                "data.lr_scheduler.params.T_max": [30],
+                "architecture.params.dropout_rate": [0.3758349362760782],
+                "architecture.params.n_hidden_neurons": ["\\[512\\]"],
+            }
+            data_set_dict["dopanim_arch_full"]["hp_ranges"] = {
+                "data.optimizer.gt_params.lr": [0.0018257282849743],
+                "data.optimizer.gt_params.weight_decay": [2.023998252708315e-05],
+                "data.optimizer.ap_params.lr": [0.0018257282849743],
+                "data.optimizer.ap_params.weight_decay": [0.0],
+                "data.train_batch_size": [64],
+                "data.max_epochs": [50],
+                "data.lr_scheduler.params.T_max": [50],
+                "architecture.params.dropout_rate": [0.3625887050293386],
+                "architecture.params.n_hidden_neurons": ["\\[512,256\\]"],
+            }
+
     elif experiment_type == "default":
         for key in data_set_dict:
             data_set_dict[key]["hp_ranges"] = {}
@@ -925,7 +1203,6 @@ if __name__ == "__main__":
                     elif clf == "coin_net":
                         hp_ranges_clf["classifier.params.lmbda"] = loguniform(1e-3, 1e-1)
                         hp_ranges_clf["classifier.params.mu"] = loguniform(1e-3, 1e-1)
-                        hp_ranges_clf["classifier.params.mu"] = uniform(0.0, 1.0)
                     hpc = hp_ranges | hpc_addendum | hp_ranges_clf
                     n_configs = 50
                 else:
@@ -1009,4 +1286,5 @@ if __name__ == "__main__":
             cpus_per_task=cpus_per_task,
             use_slurm=use_slurm,
             partition=partition,
+            walltime=walltime,
         )
