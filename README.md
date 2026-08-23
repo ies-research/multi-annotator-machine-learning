@@ -2,11 +2,11 @@
 <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 <a href="https://www.pytorchlightning.ai/"><img alt="PyTorch Lightning" src="https://img.shields.io/badge/PyTorch_Lightning-792ee5?logo=pytorch-lightning&logoColor=white"></a>
 <a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
-<a href="https://arxiv.org/abs/2504.09085"><img alt="crowd-hpo @ arXiv 2025" src="https://img.shields.io/badge/arXiv-crowd--hpo @ arXiv 2025-aqua"></a>
+<a href="https://openreview.net/forum?id=SaKfhylVLK"><img alt="crowd-hpo @ TMLR 2025" src="https://img.shields.io/badge/Paper-crowd--hpo @ TMLR 2025-purple"></a>
 
 This project provides the codebase associated with the paper
 > Marek Herde, Lukas Lührs, Denis Huseljic, and Bernhard Sick. crowd-hpo: Realistic Hyperparameter Optimization and
-> Benchmarking for Learning from Crowds with Noisy Labels. arXiv 2025.
+> Benchmarking for Learning from Crowds with Noisy Labels. In TMLR, 2025.
 
 <div align="left">
   <img src="./figures/crowd-hpo-motivation.png" alt="logo" width="1000">
