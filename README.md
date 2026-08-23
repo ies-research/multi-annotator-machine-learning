@@ -6,8 +6,9 @@
 <a href="https://pytorch.org/get-started/locally/"><img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-ee4c2c?logo=pytorch&logoColor=white"></a>
 <a href="https://www.pytorchlightning.ai/"><img alt="PyTorch Lightning" src="https://img.shields.io/badge/PyTorch_Lightning-792ee5?logo=pytorch-lightning&logoColor=white"></a>
 <a href="https://hydra.cc/"><img alt="Config: Hydra" src="https://img.shields.io/badge/Config-Hydra-89b8cd"></a>
-<a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/annot-mix"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/GitHub-annot--mix @ ECAI 2024-aqua"></a>
+<a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/annot-mix"><img alt="annot-mix @ ECAI 2024" src="https://img.shields.io/badge/GitHub-annot--mix @ ECAI 2024-aqua"></a>
 <a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/dopanim"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/GitHub-dopanim @ NeurIPS 2024-aqua"></a>
+<a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/crowd-hpo"><img alt="crowd-hpo @ TMLR 2025" src="https://img.shields.io/badge/GitHub-crowd--hpo @ TMLR 2025-aqua"></a>
 > Author: Marek Herde
 
 This project implements an ecosystem for multi-annotator learning approaches, aiming to learn from data with
@@ -20,8 +21,9 @@ setting is given below.
 </div>
 
 ## Papers Employing `maml` :page_with_curl:	
-> - Marek Herde, Lukas Lührs, Denis Huseljic, and Bernhard Sick. Annot-Mix: Learning with Noisy Class Labels from Multiple Annotators via a Mixup Extension. In ECAI, 2024. <a href="https://openreview.net/forum?id=XOGosbxLrz](https://ebooks.iospress.nl/doi/10.3233/FAIA240829"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/Paper-annot--mix @ ECAI 2024-purple"></a> <a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/annot-mix"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/GitHub-annot--mix @ ECAI 2024-aqua"></a>
+> - Marek Herde, Lukas Lührs, Denis Huseljic, and Bernhard Sick. Annot-Mix: Learning with Noisy Class Labels from Multiple Annotators via a Mixup Extension. In ECAI, 2024. <a href="https://ebooks.iospress.nl/doi/10.3233/FAIA240829"><img alt="annot-mix @ ECAI 2024" src="https://img.shields.io/badge/Paper-annot--mix @ ECAI 2024-purple"></a> <a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/annot-mix"><img alt="annot-mix @ ECAI 2024" src="https://img.shields.io/badge/GitHub-annot--mix @ ECAI 2024-aqua"></a>
 > - Marek Herde, Denis Huseljic, Lukas Rauch, and Bernhard Sick. dopanim: A Dataset of Doppelganger Animals with Noisy Annotations from Multiple Humans. In NeurIPS, 2024. <a href="https://openreview.net/forum?id=XOGosbxLrz"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/Paper-dopanim @ NeurIPS 2024-purple"></a> <a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/dopanim"><img alt="dopanim @ NeurIPS 2024" src="https://img.shields.io/badge/GitHub-dopanim @ NeurIPS 2024-aqua"></a>
+> - Marek Herde, Lukas Lührs, Denis Huseljic, and Bernhard Sick. crowd-hpo: Realistic Hyperparameter Optimization and Benchmarking for Learning from Crowds with Noisy Labels. In TMLR, 2025. <a href="https://openreview.net/forum?id=SaKfhylVLK"><img alt="crowd-hpo @ TMLR 2025" src="https://img.shields.io/badge/Paper-crowd--hpo @ TMLR 2025-purple"></a> <a href="https://github.com/ies-research/multi-annotator-machine-learning/tree/crowd-hpo"><img alt="crowd-hpo @ TMLR 2025" src="https://img.shields.io/badge/GitHub-crowd--hpo @ TMLR 2025-aqua"></a>
 
 
 ## Multi-annotator Learning Approaches :robot:
